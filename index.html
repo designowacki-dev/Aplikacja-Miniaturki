@@ -376,7 +376,7 @@ let calWS=(()=>{const d=new Date(),day=d.getDay(),diff=d.getDate()-(day===0?6:da
 const TITLES={dashboard:'Dashboard',zamowienia:'Zamówienia',klienci:'Klienci',faktura:'Faktura',kalendarz:'Kalendarz',ustawienia:'Ustawienia'};
 
 const ld=()=>{try{const r=localStorage.getItem("ts-v10");if(r){const d=JSON.parse(r);S.clients=d.clients||DC;S.orders=d.orders||[];S.payments=d.payments||{};S.balance=d.balance||0;S.expenses=d.expenses||[];S.calEvents=d.calEvents||[];S.weeklyGoal=d.weeklyGoal||0}}catch{}};
-const sv=()=>{try{localStorage.setItem("ts-v10",JSON.stringify(S))}catch{};clearTimeout(sv._t);sv._t=setTimeout(async()=>{try{if(window.storage&&window.storage.set)await window.storage.set('ts-sync',JSON.stringify(S))}catch{}},2000)};
+const sv=()=>{try{localStorage.setItem("ts-v10",JSON.stringify(S))}catch{};clearTimeout(sv._t);sv._t=setTimeout(async()=>{try{await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)})}catch{}},2000)};
 const gid=()=>Date.now().toString(36)+Math.random().toString(36).substr(2,5);
 const tds=()=>{const n=new Date();return`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`};
 const fmtD=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -538,7 +538,7 @@ function saveGoal(){S.weeklyGoal=parseInt(document.getElementById('goalIn').valu
 function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ts-backup-'+tds()+'.json';a.click();toast('Eksport OK')}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{Object.assign(S,JSON.parse(ev.target.result));sv();R();toast('Import OK')}catch{toast('Błąd')}};r.readAsText(f)}
 function resetAll(){if(confirm('Usunąć wszystko?')){S={clients:DC,orders:[],payments:{},balance:0,expenses:[],calEvents:[],weeklyGoal:0};sv();R();toast('Reset')}}
-async function syncNow(){try{if(window.storage&&window.storage.set){await window.storage.set('ts-sync',JSON.stringify(S));toast('Sync ✓')}else{sv();toast('Zapisano')}}catch{toast('Zapisano')}}
+async function syncNow(){try{await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)});toast('Sync ✓')}catch{sv();toast('Zapisano lokalnie')}}
 function initPin(){const p=localStorage.getItem('ts-pin');if(!p){document.getElementById('pinIn').style.display='none';document.getElementById('pinUnl').style.display='none';document.getElementById('pinMsg').textContent='Ustaw PIN';document.getElementById('pinSetB').style.display='';oM('pinMo')}else{document.getElementById('pinIn').style.display='';document.getElementById('pinUnl').style.display='';document.getElementById('pinSetB').style.display='none';oM('pinMo');setTimeout(()=>document.getElementById('pinIn').focus(),200)}}
 function checkPin(){const p=localStorage.getItem('ts-pin'),v=document.getElementById('pinIn').value;if(v===p){cM('pinMo');R()}else{document.getElementById('pinErr').style.display='';document.getElementById('pinIn').value=''}}
 function setupPin(){cM('pinMo');oM('pinSetMo');setTimeout(()=>document.getElementById('pinNew').focus(),200)}
@@ -549,9 +549,9 @@ function oM(id){document.getElementById(id).classList.add('open')}function cM(id
 document.querySelectorAll('.mo').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})});
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
-async function init(){ld();try{if(window.storage&&window.storage.get){const r=await window.storage.get('ts-sync');if(r&&r.value){const d=JSON.parse(r.value);if(d.orders&&d.orders.length>=S.orders.length){Object.assign(S,d);sv()}}}}catch{}
+async function init(){ld();try{const res=await fetch('/api/data');if(res.ok){const r=await res.json();if(r&&r.value){const d=typeof r.value==='string'?JSON.parse(r.value):r.value;if(d.orders&&d.orders.length>=S.orders.length){Object.assign(S,d);try{localStorage.setItem("ts-v10",JSON.stringify(S))}catch{}}}}}catch{}
   const p=localStorage.getItem('ts-pin');if(p)initPin();else{R();setTimeout(()=>toast('Ustaw PIN w ⚙️'),2500)}
-  setInterval(async()=>{try{if(window.storage&&window.storage.set)await window.storage.set('ts-sync',JSON.stringify(S))}catch{}},30000)}
+  setInterval(async()=>{try{await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)})}catch{}},30000)}
 init();
 </script>
 </body>
