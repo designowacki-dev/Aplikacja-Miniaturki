@@ -397,6 +397,7 @@ select.fi{-webkit-appearance:none}
   <div class="dc chbox"><div class="chtit"><span id="earnIcon"></span> Zarobki dzienne</div><div class="bars" id="dcB"></div></div>
   <div class="dc chbox"><div class="chtit"><span id="monthIcon"></span> Miesięczne — <span id="mcY"></span></div><div class="mch" id="mcB"></div></div>
   <div class="dc" style="padding:20px" id="mCompare"></div>
+  <div class="dc" style="padding:20px" id="cliCompare"></div>
   <div class="dc" style="padding:20px"><div class="chtit"><span id="trophyIcon"></span> Top klienci</div><div id="dtL"></div></div>
 </div>
 
@@ -667,7 +668,70 @@ function rD(mo,wT,eT){const tot=mo.reduce((s,o)=>s+o.price,0);const pC=new Set()
         `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(59,130,246,.06)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">${MO[vM].substring(0,3).toUpperCase()} 1–${dayOfMonth}</div><div style="font-size:16px;font-weight:700;color:var(--pk)">${curTot} zł</div><div style="font-size:8px;color:var(--t3)">śr. ${avgCurDay} zł/dzień</div></div>`+
         `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">PROGNOZA</div><div style="font-size:16px;font-weight:700;color:${projectedEnd>=prevTot?'#22c55e':'#fbbf24'}">${projectedEnd} zł</div><div style="font-size:8px;color:var(--t3)">${pLabel} cały: ${prevTot} zł</div></div>`+
       `</div>`+
-      (diff!==0?`<div style="font-size:10px;font-weight:600;margin-top:8px;color:${statusColor}">${diff>0?'+':''}${diff} zł vs ${pLabel} (dni 1–${dayOfMonth})</div>`:``);
+      (diff!==0?`<div style="font-size:10px;font-weight:600;margin-top:8px;color:${statusColor}">${diff>0?'+':''}${diff} zł vs ${pLabel} (dni 1–${dayOfMonth})</div>`:``)+
+      (prevTot>prevToDay?`<div style="font-size:10px;color:var(--t3);margin-top:6px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);line-height:1.5">${ic('flame',12)} W ${pLabel} po ${dayOfMonth} dniu wpadło jeszcze <strong style="color:#fbbf24">${prevTot-prevToDay} zł</strong> <span style="opacity:.6">(${Math.round(((prevTot-prevToDay)/prevTot)*100)}% całości)</span></div>`:``);
+  })();
+  // Client order count comparison — month vs previous month up to current day
+  (function(){
+    const cEl=document.getElementById('cliCompare');if(!cEl)return;
+    const today2=new Date(),dayOfMonth=today2.getDate();
+    const pM2=vM===0?11:vM-1,pY2=vM===0?vY-1:vY;
+    const pLabel=MO[pM2].substring(0,3),cLabel=MO[vM].substring(0,3);
+    const prevMo=gmo(pM2,pY2),curMo=mo;
+    const wkGroup=['WARSZAWSKI KOKS','WK DZIK','KUCHNIA WK'];
+    const isWK=n=>wkGroup.includes(n.toUpperCase());
+    const grouped={};
+    const addTo=(map,o,day)=>{
+      const gn=isWK(o.clientName)?'WK DZIK / Kuchnia':o.clientName;
+      if(!map[gn])map[gn]={cur:0,curAll:0,prev:0,prevAll:0,color:o.clientColor||'var(--pk)',services:{}};
+      return{gn,entry:map[gn]};
+    };
+    curMo.forEach(o=>{
+      const{gn,entry}=addTo(grouped,o);
+      entry.curAll++;
+      if(new Date(o.date).getDate()<=dayOfMonth)entry.cur++;
+      const sk=o.service;if(!entry.services[sk])entry.services[sk]={cur:0,prev:0};
+      if(new Date(o.date).getDate()<=dayOfMonth)entry.services[sk].cur++;
+    });
+    prevMo.forEach(o=>{
+      const gn=isWK(o.clientName)?'WK DZIK / Kuchnia':o.clientName;
+      if(!grouped[gn])grouped[gn]={cur:0,curAll:0,prev:0,prevAll:0,color:o.clientColor||'var(--pk)',services:{}};
+      grouped[gn].prevAll++;
+      if(new Date(o.date).getDate()<=dayOfMonth)grouped[gn].prev++;
+      const sk=o.service;if(!grouped[gn].services[sk])grouped[gn].services[sk]={cur:0,prev:0};
+      if(new Date(o.date).getDate()<=dayOfMonth)grouped[gn].services[sk].prev++;
+    });
+    const sorted=Object.entries(grouped).filter(([,d])=>d.cur+d.prev>0).sort((a,b)=>(b[1].cur+b[1].prev)-(a[1].cur+a[1].prev));
+    if(!sorted.length){cEl.innerHTML='';return}
+    let rows='';
+    sorted.forEach(([name,d])=>{
+      const diff=d.cur-d.prev;
+      const trendIcon=diff>0?ic('trending-up',14):diff<0?ic('trending-down',14):ic('minus',14);
+      const trendColor=diff>0?'#22c55e':diff<0?'#ef4444':'#fbbf24';
+      const diffTxt=diff>0?'+'+diff:diff===0?'=':''+diff;
+      const pct=d.prev>0?Math.round(((d.cur-d.prev)/d.prev)*100):d.cur>0?100:0;
+      const pctTxt=d.prev>0?(pct>=0?'+':'')+pct+'%':'nowy';
+      let svcRows='';
+      Object.entries(d.services).sort((a,b)=>(b[1].cur+b[1].prev)-(a[1].cur+a[1].prev)).forEach(([svc,sv])=>{
+        const sd=sv.cur-sv.prev;
+        const sc=sd>0?'#22c55e':sd<0?'#ef4444':'var(--t3)';
+        const st=sd>0?'+'+sd:sd===0?'=':''+sd;
+        svcRows+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:9px"><span style="color:var(--t3);flex:1">${svc}</span><span style="min-width:28px;text-align:center">${sv.prev}</span><span style="min-width:12px;text-align:center;color:var(--t3)">→</span><span style="min-width:28px;text-align:center;font-weight:700">${sv.cur}</span><span style="min-width:32px;text-align:right;color:${sc};font-weight:600">${st}</span></div>`;
+      });
+      rows+=`<div style="padding:12px;border-radius:10px;background:rgba(255,255,255,.03);margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px"><div class="av" style="width:26px;height:26px;font-size:10px;border-radius:7px;background:${d.color}">${name[0]}</div><span style="font-size:12px;font-weight:700">${name}</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="color:${trendColor}">${trendIcon}</span><span style="font-size:13px;font-weight:700;color:${trendColor}">${diffTxt}</span><span style="font-size:9px;color:${trendColor};opacity:.7">${pctTxt}</span></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:8px">
+          <div style="flex:1;text-align:center;padding:6px;border-radius:8px;background:rgba(255,255,255,.03)"><div style="font-size:8px;color:var(--t3);margin-bottom:2px">${pLabel.toUpperCase()} 1–${dayOfMonth}</div><div style="font-size:15px;font-weight:700">${d.prev}</div><div style="font-size:7px;color:var(--t3)">cały: ${d.prevAll}</div></div>
+          <div style="flex:1;text-align:center;padding:6px;border-radius:8px;background:rgba(59,130,246,.06)"><div style="font-size:8px;color:var(--t3);margin-bottom:2px">${cLabel.toUpperCase()} 1–${dayOfMonth}</div><div style="font-size:15px;font-weight:700;color:var(--pk)">${d.cur}</div></div>
+        </div>
+        ${svcRows?`<div style="border-top:1px solid rgba(255,255,255,.05);padding-top:6px;margin-top:4px"><div style="font-size:8px;color:var(--t3);font-weight:600;margin-bottom:4px">USŁUGI (${pLabel} → ${cLabel} do ${dayOfMonth} dnia)</div>${svcRows}</div>`:''}
+      </div>`;
+    });
+    cEl.innerHTML=`<div class="chtit">${ic('users',14)} Zamówienia klientów — porównanie</div>
+      <div style="font-size:10px;color:var(--t3);margin:6px 0 12px">Dni 1–${dayOfMonth}: ${pLabel} vs ${cLabel}</div>${rows}`;
   })();
   const cm={};mo.forEach(o=>{cm[o.clientName]=(cm[o.clientName]||0)+o.price});const st=Object.entries(cm).sort((a,b)=>b[1]-a[1]);
   let mch='';st.forEach(([n,a])=>{const cl=S.clients.find(c=>c.name===n);const co2=cl?cl.color:'var(--pk)';mch+=`<div class="mob-cli"><div class="mob-cli-av" style="background:${co2}">${n[0]}</div><div class="mob-cli-info"><div class="mob-cli-name">${n}</div><div class="mob-cli-earn">${a} zł</div></div></div>`;});
