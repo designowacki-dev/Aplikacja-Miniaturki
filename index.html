@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Thumbnails Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Stretch+Pro&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -250,7 +250,7 @@ select.fi{-webkit-appearance:none}
 .mob-hero-icon{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px;backdrop-filter:blur(10px)}
 .mob-hero-bal{position:relative;z-index:1}
 .mob-hero-bal-label{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;margin-bottom:4px}
-.mob-hero-bal-val{font-size:38px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1}
+.mob-hero-bal-val{font-size:52px;font-weight:400;color:#fff;letter-spacing:-1px;line-height:1;font-family:'Stretch Pro',sans-serif}
 .mob-hero-bal-change{font-size:11px;color:#22c55e;margin-top:6px;font-weight:600}
 .mob-hero-actions{display:flex;gap:14px;margin-top:22px;position:relative;z-index:1}
 .mob-hero-act{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -354,24 +354,20 @@ select.fi{-webkit-appearance:none}
       <div class="mob-hero-bal-val" id="mobBal">0 zł</div>
       <div class="mob-hero-bal-change" id="mobBalSub"></div>
     </div>
-    <div class="mob-hero-btns">
-      <button class="mob-hero-btn" onclick="switchTab('faktura')">📄 Faktura</button>
-      <button class="mob-hero-btn" onclick="syncNow()">⟳ Synchronizuj</button>
-    </div>
     <div class="mob-hero-actions">
       <div class="mob-hero-act" onclick="switchTab('zamowienia')"><div class="mob-hero-act-icon">📋</div><div class="mob-hero-act-label">Zamówienia</div></div>
       <div class="mob-hero-act" onclick="switchTab('klienci')"><div class="mob-hero-act-icon">👥</div><div class="mob-hero-act-label">Klienci</div></div>
       <div class="mob-hero-act" onclick="switchTab('kalendarz')"><div class="mob-hero-act-icon">📅</div><div class="mob-hero-act-label">Kalendarz</div></div>
       <div class="mob-hero-act" onclick="switchTab('faktura')"><div class="mob-hero-act-icon">📄</div><div class="mob-hero-act-label">Faktura</div></div>
+      <div class="mob-hero-act" onclick="syncNow()"><div class="mob-hero-act-icon">⟳</div><div class="mob-hero-act-label">Synchronizuj</div></div>
     </div>
     <div class="mob-hero-clients" id="mobClients"></div>
   </div>
-  <div class="sg sg4">
-    <div class="wc st"><div class="st-l">W toku</div><div class="st-v pk-t" id="dW">0 zł</div><div class="st-s" id="dWs"></div></div>
-    <div class="wc st"><div class="st-l">Zarobione</div><div class="st-v" style="color:#999" id="dE">0 zł</div><div class="st-s" id="dEs"></div></div>
+  <div class="sg sg2">
     <div class="pc st"><div class="st-l" style="opacity:.7">Suma miesiąca</div><div class="st-v" id="dT">0 zł</div><div class="st-s" style="opacity:.6" id="dTs"></div></div>
     <div class="dc st" style="cursor:pointer" onclick="openBal()"><div class="st-l">Na koncie ✎</div><div class="st-v pk-t" id="dBl">0 zł</div><div class="st-s">edytuj</div></div>
   </div>
+  <div style="display:none"><span id="dW"></span><span id="dWs"></span><span id="dE"></span><span id="dEs"></span></div>
   <div class="sg sg3">
     <div class="dc st"><div class="st-l">Dzisiaj</div><div class="st-v" id="dTd">0 zł</div><div class="st-s" id="dTds"></div></div>
     <div class="dc st"><div class="st-l">Streak 🔥</div><div class="st-v" style="color:#fbbf24" id="dSk">0</div><div class="st-s">dni z zamówieniami</div></div>
@@ -536,7 +532,7 @@ function rD(mo,wT,eT){const tot=mo.reduce((s,o)=>s+o.price,0);const pC=new Set()
   document.getElementById('dW').textContent=wT+' zł';document.getElementById('dWs').textContent=mo.filter(o=>o.status==='w realizacji').length+' w realizacji';
   document.getElementById('dE').textContent=eT+' zł';document.getElementById('dEs').textContent=pC.size+' opłaconych';
   document.getElementById('dT').textContent=tot+' zł';document.getElementById('dTs').textContent=mo.length+' zamówień';
-  document.getElementById('mobBal').textContent=tot+' zł';document.getElementById('mobBalSub').textContent=MO[vM]+' '+vY+' · '+mo.length+' zamówień';
+  document.getElementById('mobBal').innerHTML=tot.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ')+'<span style="font-size:28px;opacity:.5;margin-left:8px">PLN</span>';document.getElementById('mobBalSub').textContent=MO[vM]+' '+vY+' · '+mo.length+' zamówień';
   document.getElementById('dBl').textContent=S.balance+' zł';document.getElementById('dTd').textContent=tO.reduce((s,o)=>s+o.price,0)+' zł';document.getElementById('dTds').textContent=tO.length+' zleceń';
   let streak=0;const d=new Date();for(let i=0;i<365;i++){const dd=new Date(d);dd.setDate(d.getDate()-i);if(S.orders.some(o=>o.date===fmtD(dd)))streak++;else break}document.getElementById('dSk').textContent=streak;
   const doneC=mo.filter(o=>o.status==='gotowe').length,prod=mo.length>0?Math.round((doneC/mo.length)*100):0;
