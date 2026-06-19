@@ -658,10 +658,13 @@ function rD(mo,wT,eT){const tot=mo.reduce((s,o)=>s+o.price,0);const pC=new Set()
     const today2=new Date(),dayOfMonth=today2.getDate();
     const dimCur=new Date(vY,vM+1,0).getDate();
     const pM2=vM===0?11:vM-1,pY2=vM===0?vY-1:vY;
-    const prevMo=gmo(pM2,pY2).filter(o=>o.status==='gotowe');
+    const prevAll=gmo(pM2,pY2);
+    const prevDone=prevAll.filter(o=>o.status==='gotowe');
+    const prevMo=prevDone.length>0?prevDone:prevAll;
     const prevTot=prevMo.reduce((s,o)=>s+o.price,0);
     const prevToDay=prevMo.filter(o=>new Date(o.date).getDate()<=dayOfMonth).reduce((s,o)=>s+o.price,0);
-    const curTot=mo.filter(o=>o.status==='gotowe').reduce((s,o)=>s+o.price,0);
+    const curDone=mo.filter(o=>o.status==='gotowe');
+    const curTot=curDone.length>0?curDone.reduce((s,o)=>s+o.price,0):tot;
     const avgPrevDay=dayOfMonth>0?Math.round(prevToDay/dayOfMonth):0;
     const avgCurDay=dayOfMonth>0?Math.round(curTot/dayOfMonth):0;
     const diff=curTot-prevToDay;
