@@ -628,42 +628,47 @@ function rD(mo,wT,eT){const tot=mo.reduce((s,o)=>s+o.price,0);const pC=new Set()
   const mx=Math.max(...dl,1);let ch='';for(let i=0;i<dim;i++){const bh=Math.max((dl[i]/mx)*80,2);ch+=`<div class="bw">${dl[i]>0?`<div class="bvl">${dl[i]}</div>`:''}<div class="br" style="height:${bh}px"></div><div class="blb">${i+1}</div></div>`}document.getElementById('dcB').innerHTML=ch;
   document.getElementById('mcY').textContent=vY;const mT=MO.map((_,i)=>gmo(i,vY).reduce((s,o)=>s+o.price,0)),mM=Math.max(...mT,1);let mh='';
   for(let i=0;i<12;i++){const bh=Math.max((mT[i]/mM)*45,2);mh+=`<div class="mw">${mT[i]>0?`<div style="font-size:6px;color:#444;font-weight:600">${mT[i]}</div>`:''}<div class="mbr${i===vM?' cur':''}" style="height:${bh}px"></div><div class="mbl">${MO[i].substring(0,3)}</div></div>`}document.getElementById('mcB').innerHTML=mh;
-  // Month comparison
+  // Month comparison — day-to-day
   (function(){
     const cEl=document.getElementById('mCompare');if(!cEl)return;
-    const pM2=vM===0?11:vM-1,pY2=vM===0?vY-1:vY;
-    const prevMo=gmo(pM2,pY2),prevTot=prevMo.reduce((s,o)=>s+o.price,0);
-    const dimPrev=new Date(pY2,pM2+1,0).getDate();
-    const avgPrev=prevTot>0?Math.round(prevTot/dimPrev):0;
     const today2=new Date(),dayOfMonth=today2.getDate();
     const dimCur=new Date(vY,vM+1,0).getDate();
+    const pM2=vM===0?11:vM-1,pY2=vM===0?vY-1:vY;
+    const prevMo=gmo(pM2,pY2);
+    const prevTot=prevMo.reduce((s,o)=>s+o.price,0);
+    // Zarobki z poprzedniego miesiąca TYLKO do tego samego dnia
+    const prevToDay=prevMo.filter(o=>{const d=new Date(o.date).getDate();return d<=dayOfMonth}).reduce((s,o)=>s+o.price,0);
     const curTot=tot;
-    const expectedByNow=avgPrev*dayOfMonth;
+    // Średnia dzienna z poprzedniego miesiąca (do tego dnia)
+    const avgPrevDay=dayOfMonth>0?Math.round(prevToDay/dayOfMonth):0;
+    const avgCurDay=dayOfMonth>0?Math.round(curTot/dayOfMonth):0;
+    // Różnica: obecne zarobki vs poprzedni miesiąc do tego samego dnia
+    const diff=curTot-prevToDay;
+    const diffPct=prevToDay>0?Math.round((diff/prevToDay)*100):0;
+    // Prognoza na cały miesiąc na podstawie obecnego tempa
     const projectedEnd=dayOfMonth>0?Math.round((curTot/dayOfMonth)*dimCur):0;
-    const diff=curTot-expectedByNow;
-    const diffPct=expectedByNow>0?Math.round((diff/expectedByNow)*100):0;
-    let status,statusColor,statusIcon,statusMsg;
-    if(prevTot===0&&curTot===0){status='neutral';statusColor='var(--t3)';statusIcon=ic('minus',16)||'—';statusMsg='Brak danych do porównania'}
-    else if(prevTot===0){status='up';statusColor='#22c55e';statusIcon=ic('trending-up',16);statusMsg='Nowy miesiąc — poprzedni bez zarobków'}
-    else if(diff>0&&diffPct>=20){status='great';statusColor='#22c55e';statusIcon=ic('trending-up',20);statusMsg='Świetnie! Jesteś '+Math.abs(diffPct)+'% powyżej tempa'}
-    else if(diff>0){status='good';statusColor='#22c55e';statusIcon=ic('trending-up',18);statusMsg='Dobrze — '+Math.abs(diffPct)+'% powyżej tempa'}
-    else if(diff===0){status='same';statusColor='#fbbf24';statusIcon=ic('minus',16)||'=';statusMsg='Równo z tempem poprzedniego miesiąca'}
-    else if(diffPct>=-20){status='slight';statusColor='#fbbf24';statusIcon=ic('trending-down',16);statusMsg='Lekko poniżej — '+Math.abs(diffPct)+'% za tempem'}
-    else{status='behind';statusColor='#ef4444';statusIcon=ic('trending-down',20);statusMsg='Słabiej — '+Math.abs(diffPct)+'% za tempem poprzedniego miesiąca'}
-    const pctBar=expectedByNow>0?Math.min(Math.round((curTot/expectedByNow)*100),200):0;
-    const barW=Math.min(pctBar,100);
+    let statusColor,statusIcon,statusMsg;
+    if(prevToDay===0&&curTot===0){statusColor='var(--t3)';statusIcon=ic('minus',16);statusMsg='Brak danych do porównania'}
+    else if(prevToDay===0){statusColor='#22c55e';statusIcon=ic('trending-up',16);statusMsg='Nowy miesiąc — poprzedni bez zarobków'}
+    else if(diff>0&&diffPct>=20){statusColor='#22c55e';statusIcon=ic('trending-up',20);statusMsg='Świetnie! '+diffPct+'% więcej niż '+MO[pM2].substring(0,3)+' do '+dayOfMonth+' dnia'}
+    else if(diff>0){statusColor='#22c55e';statusIcon=ic('trending-up',18);statusMsg='Dobrze — '+diffPct+'% więcej niż '+MO[pM2].substring(0,3)+' do '+dayOfMonth+' dnia'}
+    else if(diff===0){statusColor='#fbbf24';statusIcon=ic('minus',16);statusMsg='Równo z '+MO[pM2].substring(0,3)+' do '+dayOfMonth+' dnia'}
+    else if(diffPct>=-20){statusColor='#fbbf24';statusIcon=ic('trending-down',16);statusMsg='Lekko poniżej — '+Math.abs(diffPct)+'% mniej niż '+MO[pM2].substring(0,3)}
+    else{statusColor='#ef4444';statusIcon=ic('trending-down',20);statusMsg='Słabiej — '+Math.abs(diffPct)+'% mniej niż '+MO[pM2].substring(0,3)+' do '+dayOfMonth+' dnia'}
+    const barPct=prevToDay>0?Math.min(Math.round((curTot/prevToDay)*100),200):0;
+    const barW=Math.min(barPct,100);
     cEl.innerHTML=`<div class="chtit">${ic('bar-chart',14)} Tempo miesiąca</div>`+
-      `<div style="display:flex;align-items:center;gap:12px;margin:14px 0 10px"><div style="color:${statusColor};flex-shrink:0">${statusIcon}</div><div><div style="font-size:13px;font-weight:700;color:${statusColor}">${statusMsg}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Dzień ${dayOfMonth}/${dimCur} miesiąca</div></div></div>`+
+      `<div style="display:flex;align-items:center;gap:12px;margin:14px 0 10px"><div style="color:${statusColor};flex-shrink:0">${statusIcon}</div><div><div style="font-size:13px;font-weight:700;color:${statusColor}">${statusMsg}</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Porównanie dni 1–${dayOfMonth} (${MO[pM2].substring(0,3)} vs ${MO[vM].substring(0,3)})</div></div></div>`+
       `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0">`+
-        `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">POPRZEDNI</div><div style="font-size:16px;font-weight:700">${prevTot} zł</div><div style="font-size:8px;color:var(--t3)">${MO[pM2].substring(0,3)} ${pY2}</div></div>`+
-        `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(59,130,246,.06)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">OBECNY</div><div style="font-size:16px;font-weight:700;color:var(--pk)">${curTot} zł</div><div style="font-size:8px;color:var(--t3)">dzień ${dayOfMonth}</div></div>`+
-        `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">PROGNOZA</div><div style="font-size:16px;font-weight:700;color:${projectedEnd>=prevTot?'#22c55e':'#fbbf24'}">${projectedEnd} zł</div><div style="font-size:8px;color:var(--t3)">do końca</div></div>`+
+        `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">${MO[pM2].substring(0,3).toUpperCase()} 1–${dayOfMonth}</div><div style="font-size:16px;font-weight:700">${prevToDay} zł</div><div style="font-size:8px;color:var(--t3)">śr. ${avgPrevDay} zł/dzień</div></div>`+
+        `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(59,130,246,.06)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">${MO[vM].substring(0,3).toUpperCase()} 1–${dayOfMonth}</div><div style="font-size:16px;font-weight:700;color:var(--pk)">${curTot} zł</div><div style="font-size:8px;color:var(--t3)">śr. ${avgCurDay} zł/dzień</div></div>`+
+        `<div style="text-align:center;padding:10px;border-radius:10px;background:rgba(255,255,255,.03)"><div style="font-size:9px;color:var(--t3);font-weight:600;margin-bottom:4px">PROGNOZA</div><div style="font-size:16px;font-weight:700;color:${projectedEnd>=prevTot?'#22c55e':'#fbbf24'}">${projectedEnd} zł</div><div style="font-size:8px;color:var(--t3)">${MO[pM2].substring(0,3)} cały: ${prevTot} zł</div></div>`+
       `</div>`+
-      `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:4px"><span>0 zł</span><span>Oczekiwane: ${expectedByNow} zł</span></div>`+
+      `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-bottom:4px"><span>0 zł</span><span>${MO[pM2].substring(0,3)} do ${dayOfMonth}: ${prevToDay} zł</span></div>`+
       `<div style="width:100%;height:6px;border-radius:3px;background:#151d30;overflow:hidden;position:relative">`+
         `<div style="height:100%;border-radius:3px;width:${barW}%;background:${diff>=0?'linear-gradient(90deg,#22c55e,#4ade80)':'linear-gradient(90deg,#f59e0b,#fbbf24)'};transition:width .5s"></div>`+
       `</div></div>`+
-      (diff!==0?`<div style="font-size:10px;font-weight:600;margin-top:6px;color:${statusColor}">${diff>0?'+':''}${diff} zł ${diff>0?'powyżej':'poniżej'} oczekiwanego tempa</div>`:``);
+      (diff!==0?`<div style="font-size:10px;font-weight:600;margin-top:6px;color:${statusColor}">${diff>0?'+':''}${diff} zł vs ${MO[pM2].substring(0,3)} (dni 1–${dayOfMonth})</div>`:``);
   })();
   const cm={};mo.forEach(o=>{cm[o.clientName]=(cm[o.clientName]||0)+o.price});const st=Object.entries(cm).sort((a,b)=>b[1]-a[1]);
   let mch='';st.forEach(([n,a])=>{const cl=S.clients.find(c=>c.name===n);const co2=cl?cl.color:'var(--pk)';mch+=`<div class="mob-cli"><div class="mob-cli-av" style="background:${co2}">${n[0]}</div><div class="mob-cli-info"><div class="mob-cli-name">${n}</div><div class="mob-cli-earn">${a} zł</div></div></div>`;});
