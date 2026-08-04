@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Thumbnails Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-<style>@font-face{font-family:'Owners XWide';src:url('https://fonts.cdnfonts.com/css/owners-xwide');font-weight:700;font-style:normal;font-display:swap}@font-face{font-family:'Owners XWide';font-weight:700;font-style:normal;font-display:swap;src:local('Owners XWide Bold'),local('OwnersXWide-Bold')}</style>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -296,19 +295,22 @@ select.fi{-webkit-appearance:none}
 .mob-hero-icon{width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--bord);display:flex;align-items:center;justify-content:center;color:var(--t1);transition:all .2s var(--e-out)}
 .mob-hero-icon:active{background:rgba(249,115,22,.16);border-color:rgba(249,115,22,.4);color:var(--pk)}
 /* balance card */
-.mbc{position:relative;overflow:hidden;border-radius:26px;padding:22px;background:linear-gradient(145deg,rgba(249,115,22,.30),rgba(239,68,68,.16) 48%,rgba(239,68,68,.12) 84%),#111119;border:1px solid rgba(251,146,60,.28);box-shadow:0 18px 50px -18px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.06)}
-.mbc::after{content:'';position:absolute;top:-50%;right:-15%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.22),transparent 70%);pointer-events:none}
+.mbc{position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 20px;background:radial-gradient(130% 115% at 100% -12%,rgba(251,146,60,.36),transparent 50%),radial-gradient(120% 120% at -12% 118%,rgba(239,68,68,.20),transparent 54%),linear-gradient(158deg,#1c130f,#120e13 72%);box-shadow:0 26px 60px -26px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08)}
 .mbc-head{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
-.mbc-label{font-size:11px;font-weight:600;color:var(--t2);letter-spacing:.3px}
-.mbc-month{font-size:10px;font-weight:700;color:var(--pk);background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.22);padding:5px 12px;border-radius:20px}
-.mbc-main{font-family:'Owners XWide','Space Grotesk',sans-serif;font-size:46px;font-weight:700;color:var(--t1);letter-spacing:-1.5px;line-height:1;margin:10px 0 18px;position:relative;z-index:1;display:flex;align-items:baseline;gap:7px}
-.mbc-main .amt-pln{font-size:16px;opacity:.45;letter-spacing:0}
-.mbc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;position:relative;z-index:1;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.05);border-radius:16px;overflow:hidden}
-.mbc-stat{padding:13px 10px;text-align:center;border-right:1px solid rgba(255,255,255,.05)}
+.mbc-label{font-size:10.5px;font-weight:700;color:var(--t2);letter-spacing:.7px;text-transform:uppercase}
+.mbc-month{font-size:10px;font-weight:700;color:var(--pk2);background:rgba(249,115,22,.14);border:1px solid rgba(249,115,22,.24);padding:5px 12px;border-radius:20px;letter-spacing:.2px}
+.mbc-main{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;font-size:47px;font-weight:800;color:#fff;letter-spacing:-.035em;line-height:1;margin:16px 0 20px;position:relative;z-index:1;display:flex;align-items:baseline}
+.mbc-main .mbc-gr{font-size:.42em;font-weight:600;color:rgba(255,240,228,.5)}
+.mbc-main .amt-pln{font-size:.34em;font-weight:600;color:rgba(255,240,228,.62);letter-spacing:.02em;margin-left:9px;text-transform:lowercase}
+.mbc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;position:relative;z-index:1;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.06);border-radius:15px;overflow:hidden}
+.mbc-stat{padding:13px 8px 12px;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
 .mbc-stat:last-child{border-right:none}
-.mbc-stat-v{font-size:16px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1}
-.mbc-stat-l{font-size:8.5px;font-weight:600;color:var(--t2);margin-top:5px;text-transform:uppercase;letter-spacing:.4px}
-.mbc-stat.hl .mbc-stat-v{color:var(--pk)}
+.mbc-stat.hl{background:linear-gradient(180deg,rgba(249,115,22,.11),transparent)}
+.mbc-stat-v{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;font-size:16px;font-weight:800;color:var(--t1);letter-spacing:-.02em;line-height:1;display:flex;align-items:baseline;justify-content:center;white-space:nowrap}
+.mbc-stat-v .mbc-sgr{font-size:.6em;font-weight:600;color:var(--t3);margin-left:.5px}
+.mbc-stat-l{font-size:8px;font-weight:700;color:var(--t2);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+.mbc-stat.hl .mbc-stat-v{color:var(--pk2)}
+.mbc-stat.hl .mbc-stat-v .mbc-sgr{color:rgba(251,146,60,.55)}
 /* action row */
 .mob-hero-actions{display:flex;gap:8px;margin-top:18px;position:relative;z-index:1;justify-content:space-between}
 .mob-hero-act{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1}
@@ -547,11 +549,11 @@ input[type=time].fi::-webkit-calendar-picker-indicator,input[type=date].fi::-web
         <span class="mbc-label">Suma zarobków</span>
         <span class="mbc-month" id="mobBalSub">Czerwiec 2026</span>
       </div>
-      <div class="mbc-main"><span id="mobBalMain">0</span><span class="amt-pln">zł</span></div>
+      <div class="mbc-main"><span id="mobBalMain">0</span><span class="mbc-gr">,00</span><span class="amt-pln">zł</span></div>
       <div class="mbc-stats">
-        <div class="mbc-stat hl"><div class="mbc-stat-v" id="mobStat1">0</div><div class="mbc-stat-l">Zrealizowane</div></div>
-        <div class="mbc-stat"><div class="mbc-stat-v" id="mobStat2">0</div><div class="mbc-stat-l">W toku</div></div>
-        <div class="mbc-stat"><div class="mbc-stat-v" id="mobStat3">0</div><div class="mbc-stat-l">Na koncie</div></div>
+        <div class="mbc-stat hl"><div class="mbc-stat-v"><span id="mobStat1">0</span><span class="mbc-sgr">,00</span></div><div class="mbc-stat-l">Zrealizowane</div></div>
+        <div class="mbc-stat"><div class="mbc-stat-v"><span id="mobStat2">0</span><span class="mbc-sgr">,00</span></div><div class="mbc-stat-l">W toku</div></div>
+        <div class="mbc-stat"><div class="mbc-stat-v"><span id="mobStat3">0</span><span class="mbc-sgr">,00</span></div><div class="mbc-stat-l">Na koncie</div></div>
       </div>
     </div>
     <div class="mob-hero-actions">
