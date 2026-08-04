@@ -1057,16 +1057,16 @@ function dCE(id){const ev=S.calEvents.find(e=>e.id===id);if(ev&&ev.orderId)S.ord
 
 let _extraEid=null;
 function showExtra(eid){_extraEid=eid;const ev=S.calEvents.find(e=>e.id===eid);if(!ev)return;
-  document.getElementById('extraInfo').textContent=ev.clientName+' · '+ev.service+' · '+ev.price+' zł';
-  const presets=[10,20,30,40,50,100];
+  document.getElementById('extraInfo').textContent=evTitle(ev)+(ev.clientName?' · '+ev.clientName:'')+' · '+(ev.price||0)+' zł';
+  const presets=[10,20,30,40,50,60,70,80,90,100];
   document.getElementById('extraBtns').innerHTML=presets.map(p=>'<button class="btn btn-g" style="flex:1;min-width:60px;padding:12px 8px;font-size:14px;font-weight:700" onclick="addExtra('+p+')">+'+p+'</button>').join('');
   document.getElementById('extraCustom').value='';oM('extraMo')}
 function addExtra(amt){if(!_extraEid||!amt)return;const ev=S.calEvents.find(e=>e.id===_extraEid);if(!ev)return;
   if(!ev.extras)ev.extras=[];ev.extras.push(amt);ev.price+=amt;
   if(ev.orderId){const o=S.orders.find(x=>x.id===ev.orderId);if(o)o.price+=amt}
-  sv();cM('extraMo');_extraEid=null;R()}
+  sv();cM('extraMo');_extraEid=null;R();toast('Doliczono +'+amt+' zł za poprawki');autoPush()}
 function addExtraCustom(){const v=parseInt(document.getElementById('extraCustom').value);if(v>0)addExtra(v)}
-function tO(id){const o=S.orders.find(x=>x.id===id);if(o)o.status=o.status==='w realizacji'?'gotowe':'w realizacji';sv();R()}
+function tO(id){const o=S.orders.find(x=>x.id===id);if(o)o.status=o.status==='w realizacji'?'gotowe':'w realizacji';sv();R();autoPush()}
 function dO(id){S.orders=S.orders.filter(o=>o.id!==id);sv();R()}
 function chD(id,v){const o=S.orders.find(x=>x.id===id);if(o&&v){o.date=v;sv();R()}}
 function rC(id){S.clients=S.clients.filter(c=>c.id!==id);sv();R()}
@@ -1201,7 +1201,7 @@ function evColor(e){if(e.color)return e.color;if(e.isCost)return '#ef4444';if(e.
 function durTxt(m){if(m<0)m+=1440;const h=Math.floor(m/60),mm=Math.round(m%60);return (h?h+' h':'')+(h&&mm?' ':'')+(mm?mm+' min':(h?'':'0 min'));}
 function evDurTxt(e){if(e.allDay)return 'cały dzień';return durTxt(t2m(evEnd(e))-t2m(evStart(e)));}
 function evDone(e){return !!(e.done||(e.orderId&&S.orders.find(o=>o.id===e.orderId&&o.status==='gotowe')));}
-function evAccept(id){const e=S.calEvents.find(x=>x.id===id);if(!e)return;if(e.orderId){const o=S.orders.find(x=>x.id===e.orderId);if(o)o.status=o.status==='gotowe'?'w realizacji':'gotowe';}else e.done=!e.done;sv();R();toast(evDone(e)?'Zaakceptowano ✓':'Cofnięto');}
+function evAccept(id){const e=S.calEvents.find(x=>x.id===id);if(!e)return;if(e.orderId){const o=S.orders.find(x=>x.id===e.orderId);if(o)o.status=o.status==='gotowe'?'w realizacji':'gotowe';}else e.done=!e.done;sv();R();toast(evDone(e)?'Zaakceptowano ✓':'Cofnięto');autoPush();}
 function dupEv(id){const e=S.calEvents.find(x=>x.id===id);if(!e)return;const c=JSON.parse(JSON.stringify(e));c.id=gid();delete c.done;if(e.orderId){const o=S.orders.find(x=>x.id===e.orderId);if(o){const no=Object.assign({},o,{id:gid(),status:'w realizacji'});S.orders.push(no);c.orderId=no.id;}}S.calEvents.push(c);sv();R();toast('Zduplikowano');}
 function evDel(id){const e=S.calEvents.find(x=>x.id===id);if(e&&e.orderId)S.orders=S.orders.filter(o=>o.id!==e.orderId);S.calEvents=S.calEvents.filter(x=>x.id!==id);sv();R();}
 function dayEvts(ds){return S.calEvents.filter(e=>e.date===ds);}
@@ -1266,7 +1266,7 @@ function renderTimeGrid(body,days){
     for(let hr=0;hr<24;hr++)bd+='<div class="gc-tg-slot" onclick="calNewAt(\''+ds+'\',\''+p2(hr)+':00\')"></div>';
     const timed=dayEvts(ds).filter(e=>!evAllDay(e)).map(e=>({e,s:t2m(evStart(e)),en:Math.max(t2m(evEnd(e)),t2m(evStart(e))+20)}));
     layoutDay(timed).forEach(it=>{const e=it.e,top=it.s/60*HGT,hgt=Math.max((it.en-it.s)/60*HGT-2,18),w=100/it.total,left=it.col*w;
-      bd+='<div class="gc-ev'+(evDone(e)?' done':'')+'" data-ev="'+e.id+'" tabindex="0" role="button" aria-label="'+eH(evTitle(e))+', '+evStart(e)+' do '+evEnd(e)+', '+evDurTxt(e)+'" style="top:'+top+'px;height:'+hgt+'px;left:calc('+left+'% + 1px);width:calc('+w+'% - 3px);background:'+evColor(e)+'"><div class="gc-ev-t">'+eH(evTitle(e))+'</div><div class="gc-ev-s">'+evStart(e)+'–'+evEnd(e)+' · '+evDurTxt(e)+(e.price?' · '+e.price+' zł':'')+'</div><div class="gc-ev-act"><button class="gc-eb" title="Akceptuj" onclick="event.stopPropagation();evAccept(\''+e.id+'\')">✓</button><button class="gc-eb" title="Duplikuj" onclick="event.stopPropagation();dupEv(\''+e.id+'\')">⧉</button><button class="gc-eb" title="Usuń" onclick="event.stopPropagation();evDel(\''+e.id+'\')">✕</button></div><div class="gc-ev-rz"></div></div>';
+      bd+='<div class="gc-ev'+(evDone(e)?' done':'')+'" data-ev="'+e.id+'" tabindex="0" role="button" aria-label="'+eH(evTitle(e))+', '+evStart(e)+' do '+evEnd(e)+', '+evDurTxt(e)+'" style="top:'+top+'px;height:'+hgt+'px;left:calc('+left+'% + 1px);width:calc('+w+'% - 3px);background:'+evColor(e)+'"><div class="gc-ev-t">'+eH(evTitle(e))+'</div><div class="gc-ev-s">'+evStart(e)+'–'+evEnd(e)+' · '+evDurTxt(e)+(e.price?' · '+e.price+' zł':'')+'</div><div class="gc-ev-act"><button class="gc-eb" title="Akceptuj" onclick="event.stopPropagation();evAccept(\''+e.id+'\')">✓</button>'+(e.orderId?'<button class="gc-eb" title="Dopłata za poprawki" onclick="event.stopPropagation();showExtra(\''+e.id+'\')">＋</button>':'')+'<button class="gc-eb" title="Duplikuj" onclick="event.stopPropagation();dupEv(\''+e.id+'\')">⧉</button><button class="gc-eb" title="Usuń" onclick="event.stopPropagation();evDel(\''+e.id+'\')">✕</button></div><div class="gc-ev-rz"></div></div>';
     });
     if(isT)bd+='<div class="gc-nowline" style="top:'+(nowMin/60*HGT)+'px"></div>';
     bd+='</div>';
@@ -1580,7 +1580,7 @@ function postAccept(ds){
     if(postStatus(ds)==='penalty'){S.orders=S.orders.filter(o=>o.id!=='pen_'+ds);S.balance+=S.postCfg.amount;} // refund past fine
     S.postLog[ds]='done';
   }
-  sv();R();
+  sv();R();autoPush();
 }
 function postChipHtml(ds){
   if(!postDue(ds))return '';
@@ -1609,6 +1609,40 @@ function rTodayCard(){
   let rows='';evs.forEach(e=>{rows+='<div class="today-task'+(evDone(e)?' done':'')+'" onclick="switchTab(\'kalendarz\');calGo3(\''+today+'\')"><span class="today-task-time">'+evStart(e)+'</span><span class="today-task-name">'+eH(evTitle(e))+'</span><span class="today-task-dur">'+evDurTxt(e)+'</span></div>';});
   el.innerHTML='<div class="today-card"><div class="today-h"><div class="today-t">Dziś · '+dnum+'</div><div class="today-metrics"><div class="today-metric"><b>'+(rem>0?durTxt(rem):'0 min')+'</b><span>do zrobienia</span></div><div class="today-metric"><b>'+finishTxt+'</b><span>koniec pracy</span></div><div class="today-metric"><b>'+done+'/'+evs.length+'</b><span>zadań</span></div></div></div><div class="today-tasks">'+rows+'</div></div>';
 }
+</script>
+<style>
+.sync-pill{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:rgba(18,14,12,.94);border:1px solid rgba(34,197,94,.4);color:#4ade80;font-size:11px;font-weight:800;letter-spacing:.2px;padding:8px 15px;border-radius:22px;z-index:500;opacity:0;pointer-events:none;box-shadow:0 10px 30px -10px rgba(0,0,0,.7);transition:opacity .28s var(--e-out),transform .28s var(--e-out)}
+.sync-pill.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:801px){.sync-pill{bottom:26px}}
+@media(prefers-reduced-motion:reduce){.sync-pill{transition:opacity .28s}}
+</style>
+<script>
+/* ═══ Auto-sync: push on action, pull on focus (Vercel KV) ═══ */
+let _pushT=null;
+function syncPill(msg){let p=document.getElementById('syncPill');if(!p){p=document.createElement('div');p.id='syncPill';p.className='sync-pill';document.body.appendChild(p);}p.textContent=msg;p.classList.add('show');clearTimeout(p._t);p._t=setTimeout(function(){p.classList.remove('show');},1700);}
+function autoPush(){if(_pushT)clearTimeout(_pushT);_pushT=setTimeout(_doPush,900);}
+async function _doPush(){_pushT=null;try{S._ts=Date.now();const r=await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)});if(r&&r.ok){S._dirty=false;try{localStorage.setItem('ts-v10',JSON.stringify(S));}catch(e){}syncPill('☁ Zsynchronizowano');}}catch(e){}}
+async function autoPull(){
+  if(S._dirty){autoPush();return;}
+  try{const r=await fetch('/api/data');if(!r||!r.ok)return;const j=await r.json();if(!j||!j.value)return;
+    const d=typeof j.value==='string'?JSON.parse(j.value):j.value;
+    if((d._ts||0)>(S._ts||0)){
+      if(Array.isArray(d.clients)&&d.clients.length)S.clients=d.clients;
+      if(Array.isArray(d.orders))S.orders=d.orders;
+      if(d.payments)S.payments=d.payments;
+      if(typeof d.balance==='number')S.balance=d.balance;
+      if(Array.isArray(d.expenses))S.expenses=d.expenses;
+      if(Array.isArray(d.calEvents))S.calEvents=d.calEvents;
+      if(d.weeklyGoal!=null)S.weeklyGoal=d.weeklyGoal;
+      S.postLog=d.postLog||S.postLog||{};if(d.postCfg)S.postCfg=d.postCfg;
+      S._ts=d._ts;S._dirty=false;try{localStorage.setItem('ts-v10',JSON.stringify(S));}catch(e){}
+      if(typeof postPenaltyRun==='function')postPenaltyRun();
+      R();syncPill('☁ Pobrano zmiany');
+    }
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)autoPull();});
+window.addEventListener('online',function(){autoPush();});
 </script>
 </body>
 </html>
