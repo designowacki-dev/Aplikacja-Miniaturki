@@ -1,6 +1,6 @@
 import { kv } from '@vercel/kv';
 
-// Synchronizacja listy przesyłek między urządzeniami (osobny klucz od Thumbnails Studio)
+// Synchronizacja listy przesyłek między urządzeniami
 const KEY = 'parcels-sync';
 
 export default async function handler(req, res) {
