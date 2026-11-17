@@ -295,12 +295,7 @@ textarea.in{height:auto;min-height:74px;padding:12px 14px;resize:vertical}
       <div class="tg-r"><div><b>Powiadomienia</b><span>Alert, gdy zmieni się status paczki (przy otwartej aplikacji)</span></div><button class="tg" id="tgNotify" onclick="toggleNotify()" aria-label="Powiadomienia"></button></div>
       <div class="tg-r"><div><b>Auto-odświeżanie</b><span>Sprawdzaj statusy co 15 minut</span></div><button class="tg" id="tgAuto" onclick="toggleAuto()" aria-label="Auto-odświeżanie"></button></div>
     </div>
-    <div class="info">
-      <div class="note"><b style="color:var(--t1)">Śledzenie automatyczne</b><br>
-        InPost i Poczta Polska pobierają się same, bez żadnej konfiguracji. Żeby same pobierały się też DPD, DHL, GLS, UPS, FedEx i Orlen, dodaj darmowy klucz z 17track.net jako zmienną <code>TRACK17_KEY</code> w ustawieniach projektu na Vercelu.
-        <div id="apiState" style="margin-top:8px;font-weight:700"></div>
-      </div>
-    </div>
+    <div class="info" id="srvState"></div>
     <div class="btns">
       <button class="btn btn-s" onclick="syncNow(true)">Synchronizuj</button>
       <button class="btn btn-s" onclick="exportData()">Eksport JSON</button>
@@ -360,41 +355,65 @@ const GROUP_ORDER = ['pickup','out','problem','transit','pending','unknown'];
 
 /* ═══ STAN ═══ */
 const LS_KEY = 'parcels-v1';
-let S = {parcels:[], settings:{notify:false, auto:true}, _ts:0};
+let S = {parcels:[], deleted:{}, settings:{notify:false, auto:true}};
 let ui = {tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
 
 function load(){
-  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,settings:{...S.settings,...(d.settings||{})}};}}catch{}
+  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
 }
 function save(push=true){
-  S._ts = Date.now();
   try{localStorage.setItem(LS_KEY, JSON.stringify(S))}catch{}
   if(push) schedulePush();
 }
+// oznacz paczkę jako zmienioną (nowsza wersja wygrywa przy synchronizacji)
+function touch(p){ p.u = Date.now() }
 
-/* ═══ SYNC (Vercel KV) ═══ */
-let pushT=null;
-function schedulePush(){clearTimeout(pushT); pushT=setTimeout(()=>syncNow(false), 1200)}
-async function pullRemote(){
-  try{
-    const r = await fetch('/api/parcels'); if(!r.ok) return false;
-    const j = await r.json(); if(!j||!j.value) return false;
-    const d = typeof j.value==='string'?JSON.parse(j.value):j.value;
-    if((d._ts||0) > (S._ts||0) && Array.isArray(d.parcels)){
-      S = {...S, ...d, settings:{...S.settings, ...(d.settings||{})}};
-      try{localStorage.setItem(LS_KEY, JSON.stringify(S))}catch{}
-      return true;
-    }
-  }catch{}
-  return false;
+/* ═══ SYNCHRONIZACJA MIĘDZY URZĄDZENIAMI ═══ */
+let pushT=null, syncing=false, syncAgain=false;
+let syncInfo = {state:null, last:0};   // state: 'on' | 'off' | 'error'
+function schedulePush(){clearTimeout(pushT); pushT=setTimeout(()=>syncNow(false), 800)}
+function mergeState(a, b){
+  const deleted = {...(a.deleted||{})};
+  for(const [id,ts] of Object.entries(b.deleted||{})) deleted[id] = Math.max(deleted[id]||0, ts||0);
+  const byId = new Map();
+  for(const p of [...(a.parcels||[]), ...(b.parcels||[])]){
+    if(!p||!p.id) continue;
+    const have = byId.get(p.id);
+    if(!have || (p.u||0) > (have.u||0)) byId.set(p.id, p);
+  }
+  const parcels = [...byId.values()].filter(p=>!(deleted[p.id] && deleted[p.id] >= (p.u||0)))
+    .sort((x,y)=>new Date(y.created||0)-new Date(x.created||0));
+  return {parcels, deleted};
 }
+function sig(st){ return JSON.stringify(st.parcels.map(p=>[p.id,p.u||0]))+JSON.stringify(st.deleted) }
 async function syncNow(loud){
+  if(syncing){ syncAgain=true; return }
+  syncing=true;
   try{
-    const changed = await pullRemote();
-    if(changed){render(); if(loud) toast('Pobrano najnowsze ✓'); return}
-    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)});
-    if(loud) toast(r.ok?'Zsynchronizowano ✓':'Synchronizacja niedostępna');
-  }catch{ if(loud) toast('Synchronizacja niedostępna') }
+    const before = sig(S);
+    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, deleted:S.deleted})});
+    if(r.status===401){ location.reload(); return }
+    if(r.status===503){ syncInfo.state='off'; if(loud) toast('Synchronizacja wyłączona — podłącz bazę w Vercelu'); return }
+    if(!r.ok) throw new Error(r.status);
+    const remote = await r.json();
+    const merged = mergeState(S, remote);           // zmiany zrobione w trakcie wysyłki zostają
+    const changed = sig(merged)!==before;
+    S.parcels = merged.parcels; S.deleted = merged.deleted;
+    save(false);
+    syncInfo = {state:'on', last:Date.now()};
+    if(changed){
+      render();
+      if(ui.detId && $('detSheet').classList.contains('on')) renderDetail();
+    }
+    if(loud) toast(changed?'Pobrano zmiany z innych urządzeń ✓':'Zsynchronizowano ✓');
+  }catch{
+    syncInfo.state='error';
+    if(loud) toast('Brak połączenia z serwerem');
+  }finally{
+    syncing=false;
+    if($('setSheet').classList.contains('on')) paintSettings();
+    if(syncAgain){ syncAgain=false; syncNow(false) }
+  }
 }
 
 /* ═══ POMOCNICZE ═══ */
@@ -584,11 +603,11 @@ function saveParcel(){
   if(ui.editId){
     p = S.parcels.find(x=>x.id===ui.editId);
     const numChanged = p.number!==number || p.carrier!==carrier;
-    Object.assign(p,{number,carrier,name,note,etaManual:eta});
+    Object.assign(p,{number,carrier,name,note,etaManual:eta}); touch(p);
     if(eta) p.eta = eta;
     if(numChanged){ p.events=[]; p.status='unknown'; p.statusText=''; p.lastCheck=0 }
   }else{
-    p = {id:uid(), number, carrier, name, note, eta, etaManual:eta, status:'unknown', statusText:'', events:[], created:new Date().toISOString(), lastChange:null, lastCheck:0, archived:false, manual:false};
+    p = {id:uid(), number, carrier, name, note, eta, etaManual:eta, status:'unknown', statusText:'', events:[], created:new Date().toISOString(), lastChange:null, lastCheck:0, archived:false, manual:false, u:Date.now()};
     S.parcels.unshift(p);
   }
   save(); closeSheet('addSheet');
@@ -661,14 +680,14 @@ function copyNum(n){ navigator.clipboard?.writeText(n).then(()=>toast('Skopiowan
 function cur(){ return S.parcels.find(x=>x.id===ui.detId) }
 function setStatus(p, status, text, evt){
   const was = p.status;
-  p.status = status; p.statusText = text||'';
+  p.status = status; p.statusText = text||''; touch(p);
   if(evt) p.events.unshift(evt);
   if(was!==status){ p.lastChange = new Date().toISOString(); notifyChange(p) }
 }
 function markDelivered(){ const p=cur(); setStatus(p,'delivered','Odebrana',{time:new Date().toISOString(),text:'Oznaczono jako odebraną',location:'',manual:true}); save(); render(); renderDetail(); toast('Oznaczono jako odebraną ✓') }
-function reopen(){ const p=cur(); p.status = p.events.length?'transit':'unknown'; p.statusText=''; p.archived=false; save(); render(); renderDetail() }
-function toggleArchive(){ const p=cur(); p.archived=!p.archived; save(); render(); closeSheet('detSheet'); toast(p.archived?'Przeniesiono do archiwum':'Przywrócono z archiwum') }
-function delParcel(){ const p=cur(); if(!confirm(`Usunąć „${p.name||p.number}”?`)) return; S.parcels=S.parcels.filter(x=>x.id!==p.id); save(); render(); closeSheet('detSheet'); toast('Usunięto') }
+function reopen(){ const p=cur(); touch(p); p.status = p.events.length?'transit':'unknown'; p.statusText=''; p.archived=false; save(); render(); renderDetail() }
+function toggleArchive(){ const p=cur(); p.archived=!p.archived; touch(p); save(); render(); closeSheet('detSheet'); toast(p.archived?'Przeniesiono do archiwum':'Przywrócono z archiwum') }
+function delParcel(){ const p=cur(); if(!confirm(`Usunąć „${p.name||p.number}”?`)) return; S.deleted[p.id]=Date.now(); S.parcels=S.parcels.filter(x=>x.id!==p.id); save(); render(); closeSheet('detSheet'); toast('Usunięto') }
 
 /* ═══ RĘCZNE STATUSY ═══ */
 const EV_OPTS = ['pending','transit','out','pickup','delivered','problem'];
@@ -694,7 +713,7 @@ async function refreshOne(p, force=false, loud=false){
     if(!ct.includes('json')) throw new Error('offline');
     const j = await r.json();
     apiOk = true;
-    p.lastCheck = Date.now();
+    p.lastCheck = Date.now(); touch(p);
     if(j.manual){ p.manual = true; p.lastError=null; if(loud) toast('Ten przewoźnik wymaga klucza 17TRACK — dodaj status ręcznie') }
     else if(j.error){ p.lastError = j.error; if(loud) toast('Nie udało się pobrać statusu') }
     else{
@@ -751,13 +770,29 @@ let autoT=null;
 function setupAuto(){ clearInterval(autoT); if(S.settings.auto) autoT=setInterval(()=>refreshAll(false), 15*60e3) }
 
 /* ═══ USTAWIENIA ═══ */
+let srv = null; // {sync, track17} z /api/status
+async function loadServerStatus(){
+  try{ const r=await fetch('/api/status'); if(r.ok) srv=await r.json() }catch{}
+}
+function stateRow(ok, title, desc){
+  const c = ok===true?'var(--c-delivered)':ok===false?'var(--c-problem)':'var(--c-pending)';
+  return `<div class="tg-r"><div><b><span style="color:${c}">●</span> ${title}</b><span>${desc}</span></div></div>`;
+}
 function paintSettings(){
   $('tgNotify').classList.toggle('on', !!S.settings.notify);
   $('tgAuto').classList.toggle('on', !!S.settings.auto);
-  $('apiState').textContent = apiOk===true?'● Serwer śledzenia połączony':apiOk===false?'● Serwer śledzenia niedostępny (tryb ręczny)':'';
-  $('apiState').style.color = apiOk===true?'var(--c-delivered)':'var(--c-problem)';
+  let syncOk, syncDesc;
+  if(syncInfo.state==='on'){ syncOk=true; syncDesc=`Włączona — ostatnio ${rel(syncInfo.last)}. Paczki są wspólne na wszystkich telefonach.` }
+  else if(syncInfo.state==='off' || (srv && !srv.sync)){ syncOk=false; syncDesc='Wyłączona — w Vercelu podłącz bazę: Storage → Upstash (Redis) → Connect, potem Redeploy.' }
+  else if(syncInfo.state==='error'){ syncOk=false; syncDesc='Błąd połączenia — spróbuj „Synchronizuj”.' }
+  else { syncOk=null; syncDesc='Sprawdzam…' }
+  const t17 = srv ? srv.track17 : null;
+  $('srvState').innerHTML =
+    stateRow(syncOk, 'Synchronizacja między telefonami', syncDesc) +
+    stateRow(apiOk===false?false:true, 'InPost i Poczta Polska', apiOk===false?'Serwer śledzenia niedostępny.':'Statusy pobierają się automatycznie.') +
+    stateRow(t17, 'DPD, DHL, GLS, UPS, FedEx, Orlen', t17===true?'Statusy pobierają się automatycznie (17TRACK).':t17===false?'Wymaga darmowego klucza z 17track.net jako zmiennej TRACK17_KEY w Vercelu.':'Sprawdzam…');
 }
-function openSettings(){ paintSettings(); openSheet('setSheet') }
+async function openSettings(){ paintSettings(); openSheet('setSheet'); await loadServerStatus(); paintSettings() }
 function exportData(){
   const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`przesylki-${new Date().toISOString().slice(0,10)}.json`; a.click();
@@ -768,7 +803,7 @@ function importData(e){
   const r=new FileReader();
   r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!Array.isArray(d.parcels)) throw 0;
     const have=new Set(S.parcels.map(p=>p.number)); let n=0;
-    for(const p of d.parcels){ if(p&&p.number&&!have.has(p.number)){ S.parcels.push({events:[],status:'unknown',...p}); n++ } }
+    for(const p of d.parcels){ if(p&&p.number&&!have.has(p.number)){ S.parcels.push({events:[],status:'unknown',...p,id:p.id||uid(),u:Date.now()}); n++ } }
     save(); render(); toast(`Zaimportowano ${n} ${plural(n,'przesyłkę','przesyłki','przesyłek')}`);
   }catch{ toast('Nieprawidłowy plik') } };
   r.readAsText(f); e.target.value='';
@@ -776,6 +811,7 @@ function importData(e){
 function clearArchive(){
   const n=S.parcels.filter(p=>p.archived).length; if(!n){ toast('Archiwum jest puste'); return }
   if(!confirm(`Usunąć na stałe ${n} ${plural(n,'przesyłkę','przesyłki','przesyłek')} z archiwum?`)) return;
+  for(const p of S.parcels) if(p.archived) S.deleted[p.id]=Date.now();
   S.parcels=S.parcels.filter(p=>!p.archived); save(); render(); toast('Wyczyszczono archiwum');
 }
 
@@ -828,8 +864,9 @@ function closeScan(){
 (async function init(){
   load(); render(); moveInd();
   setTimeout(moveInd, 300);
-  if(await pullRemote()) render();
+  await syncNow(false);
   setupAuto();
+  setInterval(()=>{ if(document.visibilityState==='visible') syncNow(false) }, 30e3);
   // odśwież statusy starsze niż 15 min
   const stale = S.parcels.filter(p=>!p.archived && p.status!=='delivered' && Date.now()-(p.lastCheck||0) > 5*60e3);
   lastAutoRun = Date.now();
@@ -838,7 +875,7 @@ function closeScan(){
   // po powrocie do aplikacji: pobierz zmiany z innych urządzeń i sprawdź statusy
   document.addEventListener('visibilitychange',async()=>{
     if(document.visibilityState!=='visible') return;
-    if(await pullRemote()) render();
+    await syncNow(false);
     if(Date.now()-lastAutoRun > 5*60e3) refreshAll(false);
   });
 })();
