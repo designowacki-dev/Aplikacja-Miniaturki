@@ -5,6 +5,7 @@
 //
 // Źródła:
 //  - InPost: publiczne API ShipX (bez klucza)
+//  - Poczta Polska: publiczna usługa SOAP (bez klucza)
 //  - pozostali przewoźnicy: 17TRACK (wymaga zmiennej środowiskowej TRACK17_KEY na Vercelu)
 
 const INPOST_URL = 'https://api-shipx-pl.easypack24.net/v1';
@@ -114,6 +115,66 @@ async function trackInpost(number) {
   };
 }
 
+
+// ── Poczta Polska: publiczna usługa śledzenia (SOAP, ogólnodostępne dane logowania) ──
+const PP_URL = 'https://tt.poczta-polska.pl/Sledzenie/services/Sledzenie';
+
+function ppKind(name, final) {
+  const t = (name || '').toLowerCase();
+  if (/doręczon|odebran|wydano odbiorcy|wydanie w placówce|wydano w placówce/.test(t)) return 'delivered';
+  if (/awizo|do odbioru|oczekuje na odbiór|czeka na odbiór|gotowa do odbioru|przesyłka w automacie/.test(t)) return 'pickup';
+  if (/do doręczenia|w doręczeniu|doręczanie/.test(t)) return 'out';
+  if (/zwrot|nieudan|odmow|nie doręczono|zatrzyman|uszkodz/.test(t)) return 'problem';
+  if (final) return 'delivered';
+  return 'transit';
+}
+
+function xmlText(block, tag) {
+  const m = block.match(new RegExp(`<(?:\\w+:)?${tag}>([\\s\\S]*?)</(?:\\w+:)?${tag}>`));
+  return m ? m[1].trim() : '';
+}
+
+async function trackPoczta(number) {
+  const envelope = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sled="http://sledzenie.pocztapolska.pl">
+<soapenv:Header><wsse:Security soapenv:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><wsse:UsernameToken><wsse:Username>sledzeniepp</wsse:Username><wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">PPSA</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header>
+<soapenv:Body><sled:sprawdzPrzesylke><sled:numer>${number.replace(/[^0-9A-Za-z]/g, '')}</sled:numer></sled:sprawdzPrzesylke></soapenv:Body></soapenv:Envelope>`;
+  const r = await fetch(PP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/xml; charset=utf-8', SOAPAction: '' },
+    body: envelope,
+  });
+  if (!r.ok) throw new Error(`Poczta Polska HTTP ${r.status}`);
+  const xml = await r.text();
+  const blocks = xml.match(/<(?:\w+:)?zdarzenie>[\s\S]*?<\/(?:\w+:)?zdarzenie>/g) || [];
+  const events = blocks.map((b) => {
+    const unit = (b.match(/<(?:\w+:)?jednostka>[\s\S]*?<\/(?:\w+:)?jednostka>/) || [''])[0];
+    const reason = (b.match(/<(?:\w+:)?przyczyna>[\s\S]*?<\/(?:\w+:)?przyczyna>/) || [''])[0];
+    const own = b.replace(unit, '').replace(reason, '');
+    const czas = xmlText(own, 'czas');
+    const name = xmlText(own, 'nazwa');
+    const why = reason ? xmlText(reason, 'nazwa') : '';
+    return {
+      time: czas ? czas.replace(' ', 'T') + (czas.length === 16 ? ':00' : '') : null,
+      text: why ? `${name} (${why})` : name,
+      location: unit ? xmlText(unit, 'nazwa') : '',
+      final: xmlText(own, 'konczace') === 'true',
+    };
+  }).filter((e) => e.text);
+  events.sort((a, b) => new Date(b.time) - new Date(a.time));
+  if (!events.length) {
+    return { status: 'unknown', statusText: 'Brak danych w Poczcie Polskiej', events: [], source: 'poczta' };
+  }
+  const last = events[0];
+  return {
+    status: ppKind(last.text, last.final),
+    statusText: last.text,
+    events: events.map(({ final, ...e }) => e),
+    eta: null,
+    pickupPoint: ppKind(last.text, last.final) === 'pickup' ? last.location : null,
+    source: 'poczta',
+  };
+}
+
 const T17_KIND = {
   NotFound: 'unknown',
   InfoReceived: 'pending',
@@ -189,6 +250,17 @@ export default async function handler(req, res) {
       return;
     }
     const key = process.env.TRACK17_KEY;
+    if (carrier === 'poczta') {
+      try {
+        const pp = await trackPoczta(number);
+        if (pp.events.length || !key) {
+          res.status(200).json(pp);
+          return;
+        }
+      } catch (e) {
+        if (!key) throw e;
+      }
+    }
     if (!key) {
       res.status(200).json({ status: null, manual: true, error: 'Automatyczne śledzenie tego przewoźnika wymaga klucza TRACK17_KEY' });
       return;
