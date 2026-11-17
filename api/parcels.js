@@ -1,4 +1,4 @@
-// Synchronizacja przesyłek między telefonami.
+// Synchronizacja przesyłek i listy do kupienia między telefonami.
 // Baza: Upstash Redis (Vercel → Storage → Upstash). Każde urządzenie wysyła swoją listę,
 // serwer łączy ją z zapisaną (nowsza wersja paczki wygrywa, usunięte zostają usunięte)
 // i odsyła wynik — dzięki temu paczki dodane na dwóch telefonach naraz się nie gubią.
@@ -39,16 +39,19 @@ export function mergeState(a, b) {
   const now = Date.now();
   for (const id of Object.keys(deleted)) if (now - deleted[id] > TOMBSTONE_TTL) delete deleted[id];
 
-  const byId = new Map();
-  for (const p of [...(a.parcels || []), ...(b.parcels || [])]) {
-    if (!p || !p.id) continue;
-    const have = byId.get(p.id);
-    if (!have || (p.u || 0) > (have.u || 0)) byId.set(p.id, p);
+  const out = { deleted };
+  for (const key of ['parcels', 'items']) {   // przesyłki i lista do kupienia
+    const byId = new Map();
+    for (const p of [...(a[key] || []), ...(b[key] || [])]) {
+      if (!p || !p.id) continue;
+      const have = byId.get(p.id);
+      if (!have || (p.u || 0) > (have.u || 0)) byId.set(p.id, p);
+    }
+    out[key] = [...byId.values()]
+      .filter((p) => !(deleted[p.id] && deleted[p.id] >= (p.u || 0)))
+      .sort((x, y) => new Date(y.created || 0) - new Date(x.created || 0));
   }
-  const parcels = [...byId.values()]
-    .filter((p) => !(deleted[p.id] && deleted[p.id] >= (p.u || 0)))
-    .sort((x, y) => new Date(y.created || 0) - new Date(x.created || 0));
-  return { parcels, deleted };
+  return out;
 }
 
 export default async function handler(req, res) {
@@ -62,7 +65,7 @@ export default async function handler(req, res) {
     let stored = parse(await redis(['GET', KEY]));
     if (!stored) {
       const old = parse(await redis(['GET', OLD_KEY]));
-      stored = old && Array.isArray(old.parcels) ? { parcels: old.parcels, deleted: {} } : { parcels: [], deleted: {} };
+      stored = old && Array.isArray(old.parcels) ? { parcels: old.parcels, items: [], deleted: {} } : { parcels: [], items: [], deleted: {} };
     }
 
     if (req.method === 'GET') {
@@ -71,7 +74,7 @@ export default async function handler(req, res) {
     }
     if (req.method === 'POST') {
       const body = parse(req.body) || {};
-      const merged = mergeState(stored, { parcels: body.parcels || [], deleted: body.deleted || {} });
+      const merged = mergeState(stored, { parcels: body.parcels || [], items: body.items || [], deleted: body.deleted || {} });
       await redis(['SET', KEY, JSON.stringify(merged)]);
       res.status(200).json(merged);
       return;

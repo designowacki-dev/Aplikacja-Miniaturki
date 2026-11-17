@@ -191,15 +191,40 @@ textarea.in{height:auto;min-height:74px;padding:12px 14px;resize:vertical}
 .toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translate(-50%,20px);opacity:0;transition:transform .35s var(--e-out),opacity .25s;z-index:90;background:var(--acc);color:var(--acc-t);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 .toast.on{transform:translate(-50%,0);opacity:1}
 
+/* główny przełącznik: Przesyłki | Do kupienia */
+.views{display:flex;gap:6px;margin-bottom:18px}
+.vw{flex:1;height:44px;border-radius:12px;background:var(--s1);border:1px solid var(--bord);font-size:14px;font-weight:650;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,color .2s,border-color .2s,transform .16s var(--e-out)}
+.vw:active{transform:scale(.97)}
+.vw.on{background:var(--acc);color:var(--acc-t);border-color:var(--acc)}
+.vw b{font-size:11px;font-weight:700;opacity:.55}
+/* lista do kupienia */
+.card.it{position:relative}
+.card.it::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--pc)}
+.chk{width:28px;height:28px;border-radius:50%;border:2px solid var(--bord2);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;transition:background .2s,border-color .2s,transform .16s var(--e-out)}
+.chk:active{transform:scale(.88)}
+.chk.on{background:var(--c-delivered);border-color:var(--c-delivered);color:#fff}
+.card.done h3{text-decoration:line-through;color:var(--t2)}
+.price{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.price b{font-size:16px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
+.price a{font-size:12px;font-weight:600;color:var(--c-transit);text-decoration:none;padding:4px 8px;border-radius:8px;background:color-mix(in srgb,var(--c-transit) 10%,transparent)}
+.grp-sum{margin-left:auto;color:var(--t3);font-weight:600}
+.in-suf{position:relative}
+.in-suf .in{padding-right:44px}
+.in-suf span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-weight:600;pointer-events:none}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
 <div class="app">
+  <nav class="views" id="views">
+    <button class="vw on" data-view="parcels"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Przesyłki<b id="vc-parcels"></b></button>
+    <button class="vw" data-view="shop"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>Do kupienia<b id="vc-shop"></b></button>
+  </nav>
   <header class="hd">
     <div>
-      <h1>Przesyłki</h1>
+      <h1 id="title">Przesyłki</h1>
       <p id="summary">&nbsp;</p>
     </div>
     <div class="hd-btns">
@@ -213,17 +238,45 @@ textarea.in{height:auto;min-height:74px;padding:12px 14px;resize:vertical}
     <input id="q" type="search" placeholder="Szukaj po nazwie lub numerze" autocomplete="off">
   </div>
 
-  <div class="tabs" id="tabs">
-    <div class="tab-ind" id="tabInd"></div>
-    <button class="tab on" data-tab="active">Aktywne<b id="cnt-active"></b></button>
-    <button class="tab" data-tab="delivered">Odebrane<b id="cnt-delivered"></b></button>
-    <button class="tab" data-tab="archived">Archiwum<b id="cnt-archived"></b></button>
-  </div>
+  <div class="tabs" id="tabs"></div>
 
   <main id="list"></main>
 </div>
 
-<button class="fab" onclick="openAdd()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Dodaj przesyłkę</button>
+<button class="fab" onclick="openAddCurrent()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="fabTxt">Dodaj przesyłkę</span></button>
+
+<!-- DO KUPIENIA: DODAJ / EDYTUJ -->
+<div class="sw" id="itemSheet"><div class="sw-bg" onclick="closeSheet('itemSheet')"></div>
+  <div class="sh">
+    <div class="grab"></div>
+    <div class="sh-h"><h2 id="itemTitle">Do kupienia</h2><button class="ib" onclick="closeSheet('itemSheet')" aria-label="Zamknij">✕</button></div>
+    <div class="fg">
+      <label class="fl" for="iName">Co kupić?</label>
+      <input class="in" id="iName" placeholder="np. Słuchawki Sony" autocomplete="off">
+    </div>
+    <div class="fg">
+      <label class="fl" for="iUrl">Link</label>
+      <div class="in-row">
+        <input class="in" id="iUrl" type="url" inputmode="url" placeholder="Wklej link do produktu" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="ib" onclick="pasteUrl()" aria-label="Wklej link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl" for="iPrice">Cena</label>
+      <div class="in-suf"><input class="in" id="iPrice" inputmode="decimal" placeholder="0,00" autocomplete="off"><span>zł</span></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Priorytet</label>
+      <div class="chips" id="prioChips"></div>
+    </div>
+    <div class="fg">
+      <label class="fl" for="iNote">Notatka</label>
+      <textarea class="in" id="iNote" placeholder="np. rozmiar, kolor, poczekać na promocję"></textarea>
+    </div>
+    <button class="btn btn-p" id="iSave" onclick="saveItem()">Dodaj do listy</button>
+    <div class="btns" id="itemActions"></div>
+  </div>
+</div>
 
 <!-- ADD / EDIT -->
 <div class="sw" id="addSheet"><div class="sw-bg" onclick="closeSheet('addSheet')"></div>
@@ -355,11 +408,11 @@ const GROUP_ORDER = ['pickup','out','problem','transit','pending','unknown'];
 
 /* ═══ STAN ═══ */
 const LS_KEY = 'parcels-v1';
-let S = {parcels:[], deleted:{}, settings:{notify:false, auto:true}};
-let ui = {tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
+let S = {parcels:[], items:[], deleted:{}, settings:{notify:false, auto:true, view:'parcels'}};
+let ui = {view:'parcels', shopTab:'todo', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
 
 function load(){
-  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
+  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,items:d.items||[],deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
 }
 function save(push=true){
   try{localStorage.setItem(LS_KEY, JSON.stringify(S))}catch{}
@@ -375,30 +428,33 @@ function schedulePush(){clearTimeout(pushT); pushT=setTimeout(()=>syncNow(false)
 function mergeState(a, b){
   const deleted = {...(a.deleted||{})};
   for(const [id,ts] of Object.entries(b.deleted||{})) deleted[id] = Math.max(deleted[id]||0, ts||0);
-  const byId = new Map();
-  for(const p of [...(a.parcels||[]), ...(b.parcels||[])]){
-    if(!p||!p.id) continue;
-    const have = byId.get(p.id);
-    if(!have || (p.u||0) > (have.u||0)) byId.set(p.id, p);
+  const out = {deleted};
+  for(const key of ['parcels','items']){
+    const byId = new Map();
+    for(const p of [...(a[key]||[]), ...(b[key]||[])]){
+      if(!p||!p.id) continue;
+      const have = byId.get(p.id);
+      if(!have || (p.u||0) > (have.u||0)) byId.set(p.id, p);
+    }
+    out[key] = [...byId.values()].filter(p=>!(deleted[p.id] && deleted[p.id] >= (p.u||0)))
+      .sort((x,y)=>new Date(y.created||0)-new Date(x.created||0));
   }
-  const parcels = [...byId.values()].filter(p=>!(deleted[p.id] && deleted[p.id] >= (p.u||0)))
-    .sort((x,y)=>new Date(y.created||0)-new Date(x.created||0));
-  return {parcels, deleted};
+  return out;
 }
-function sig(st){ return JSON.stringify(st.parcels.map(p=>[p.id,p.u||0]))+JSON.stringify(st.deleted) }
+function sig(st){ return JSON.stringify([st.parcels,st.items||[]].map(l=>l.map(p=>[p.id,p.u||0])))+JSON.stringify(st.deleted) }
 async function syncNow(loud){
   if(syncing){ syncAgain=true; return }
   syncing=true;
   try{
     const before = sig(S);
-    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, deleted:S.deleted})});
+    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, items:S.items, deleted:S.deleted})});
     if(r.status===401){ location.reload(); return }
     if(r.status===503){ syncInfo.state='off'; if(loud) toast('Synchronizacja wyłączona — podłącz bazę w Vercelu'); return }
     if(!r.ok) throw new Error(r.status);
     const remote = await r.json();
     const merged = mergeState(S, remote);           // zmiany zrobione w trakcie wysyłki zostają
     const changed = sig(merged)!==before;
-    S.parcels = merged.parcels; S.deleted = merged.deleted;
+    S.parcels = merged.parcels; S.items = merged.items; S.deleted = merged.deleted;
     save(false);
     syncInfo = {state:'on', last:Date.now()};
     if(changed){
@@ -487,13 +543,16 @@ function cardHtml(p, i){
     ${etaHtml(p)}
   </div>`;
 }
+function setCnt(id, n){ const el=$(id); if(el) el.textContent = n?n:'' }
 function render(){
+  setCnt('vc-parcels', S.parcels.filter(p=>inTab(p,'active')).length);
+  setCnt('vc-shop', S.items.filter(it=>!it.bought).length);
+  if(ui.view==='shop') renderShop(); else renderParcels();
+}
+function renderParcels(){
   const q = ui.q.trim().toLowerCase();
   const all = S.parcels;
-  for(const t of ['active','delivered','archived']){
-    const n = all.filter(p=>inTab(p,t)).length;
-    $('cnt-'+t).textContent = n?n:'';
-  }
+  for(const t of ['active','delivered','archived']) setCnt('cnt-'+t, all.filter(p=>inTab(p,t)).length);
   const act = all.filter(p=>inTab(p,'active'));
   const nPick = act.filter(p=>p.status==='pickup').length;
   const nOut = act.filter(p=>p.status==='out').length;
@@ -538,18 +597,187 @@ function render(){
 function plural(n,a,b,c){if(n===1)return a;const m10=n%10,m100=n%100;return(m10>=2&&m10<=4&&(m100<12||m100>14))?b:c}
 
 /* ═══ ZAKŁADKI ═══ */
+const TABS = {
+  parcels:[['active','Aktywne'],['delivered','Odebrane'],['archived','Archiwum']],
+  shop:[['todo','Do kupienia'],['bought','Kupione']],
+};
+function curTab(){ return ui.view==='shop' ? ui.shopTab : ui.tab }
+function renderTabs(){
+  $('tabs').innerHTML = '<div class="tab-ind" id="tabInd"></div>' + TABS[ui.view].map(([k,l])=>
+    `<button class="tab ${curTab()===k?'on':''}" data-tab="${k}">${l}<b id="cnt-${k}"></b></button>`).join('');
+}
 function moveInd(){
-  const on = document.querySelector('.tab.on'); const ind=$('tabInd');
+  const on = document.querySelector('.tab.on'); const ind=$('tabInd'); if(!on||!ind) return;
   ind.style.width = on.offsetWidth+'px';
-  ind.style.transform = `translateX(${on.offsetLeft-4}px)`;
+  ind.style.transform = `translateX(${on.offsetLeft-3}px)`;
 }
 $('tabs').addEventListener('click',e=>{
   const b = e.target.closest('.tab'); if(!b) return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
-  ui.tab = b.dataset.tab; moveInd(); render();
+  if(ui.view==='shop') ui.shopTab = b.dataset.tab; else ui.tab = b.dataset.tab;
+  moveInd(); render();
 });
+function setView(v){
+  ui.view = v; S.settings.view = v; save(false);
+  document.querySelectorAll('.vw').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
+  $('title').textContent = v==='shop' ? 'Do kupienia' : 'Przesyłki';
+  $('q').placeholder = v==='shop' ? 'Szukaj na liście zakupów' : 'Szukaj po nazwie lub numerze';
+  $('fabTxt').textContent = v==='shop' ? 'Dodaj do listy' : 'Dodaj przesyłkę';
+  $('refreshAll').style.display = v==='shop' ? 'none' : '';
+  ui.q=''; $('q').value='';
+  renderTabs(); render(); moveInd();
+  window.scrollTo({top:0});
+}
+$('views').addEventListener('click',e=>{ const b=e.target.closest('.vw'); if(b && b.dataset.view!==ui.view) setView(b.dataset.view) });
+function openAddCurrent(){ ui.view==='shop' ? openItemSheet(null) : openAdd() }
 $('q').addEventListener('input',e=>{ui.q=e.target.value; render()});
 window.addEventListener('resize', moveInd);
+
+/* ═══ DO KUPIENIA ═══ */
+const PRIO = {
+  high:{label:'Wysoki', group:'Wysoki priorytet', color:'var(--c-problem)'},
+  mid: {label:'Średni', group:'Średni priorytet', color:'var(--c-out)'},
+  low: {label:'Niski',  group:'Niski priorytet',  color:'var(--c-pending)'},
+};
+const PRIO_ORDER = ['high','mid','low'];
+const PLN = new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN'});
+const fmtPrice = n => (n==null || isNaN(n)) ? '' : PLN.format(n);
+const sumPrice = list => list.reduce((a,it)=>a+(Number(it.price)||0),0);
+function parsePrice(v){
+  const t = String(v||'').replace(/\s|zł|pln/gi,'').replace(',','.');
+  if(!t) return null;
+  const n = parseFloat(t); return isNaN(n) ? null : Math.round(n*100)/100;
+}
+function normUrl(u){
+  u = String(u||'').trim(); if(!u) return '';
+  const m = u.match(/https?:\/\/\S+/i); if(m) u = m[0];          // link wklejony razem z tekstem
+  if(!/^https?:\/\//i.test(u)) u = 'https://'+u;
+  try{ return new URL(u).href }catch{ return '' }
+}
+function hostOf(u){ try{ return new URL(u).hostname.replace(/^www\./,'') }catch{ return '' } }
+function nameFromUrl(u){
+  try{
+    const segs = new URL(u).pathname.split('/').filter(Boolean).map(x=>decodeURIComponent(x));
+    let t = segs.sort((a,b)=>b.length-a.length)[0]||'';
+    t = t.replace(/\.(html?|php|aspx)$/i,'').replace(/[-_]?\d{5,}$/,'').replace(/[-_+]+/g,' ').trim();
+    if(t.length<4 || /^[\d\s]+$/.test(t)) return '';
+    return t.charAt(0).toUpperCase()+t.slice(1);
+  }catch{ return '' }
+}
+function itemCard(it, i){
+  const host = hostOf(it.url);
+  const meta = ui.shopTab==='bought'
+    ? [it.boughtAt?`Kupiono ${fmtDate(it.boughtAt,false)}`:'Kupione', host].filter(Boolean).join(' · ')
+    : [host, it.note].filter(Boolean).join(' · ') || 'Bez linku';
+  return `<div class="card it ${it.bought?'done':''}" style="--pc:${PRIO[it.prio||'mid'].color};animation-delay:${Math.min(i,10)*30}ms" onclick="openItem('${it.id}')">
+    <button class="chk ${it.bought?'on':''}" onclick="event.stopPropagation();toggleBought('${it.id}')" aria-label="${it.bought?'Odznacz':'Oznacz jako kupione'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>
+    <div class="ci"><h3>${esc(it.name)}</h3><p>${esc(meta)}</p></div>
+    <div class="price">${it.price!=null?`<b>${fmtPrice(it.price)}</b>`:''}${it.url?`<a href="${esc(it.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Otwórz ↗</a>`:''}</div>
+  </div>`;
+}
+function renderShop(){
+  const q = ui.q.trim().toLowerCase();
+  const all = S.items;
+  const todo = all.filter(it=>!it.bought), bought = all.filter(it=>it.bought);
+  setCnt('cnt-todo', todo.length); setCnt('cnt-bought', bought.length);
+  const total = sumPrice(todo);
+  $('summary').textContent = todo.length
+    ? `${todo.length} ${plural(todo.length,'rzecz','rzeczy','rzeczy')}${total?` · razem ${fmtPrice(total)}`:''}`
+    : 'Lista jest pusta';
+  let list = ui.shopTab==='bought' ? bought : todo;
+  if(q) list = list.filter(it=>(it.name||'').toLowerCase().includes(q)||(it.url||'').toLowerCase().includes(q)||(it.note||'').toLowerCase().includes(q));
+  const L = $('list');
+  if(!list.length){
+    const msg = q ? ['Nic nie znaleziono','Spróbuj innej nazwy.'] :
+      ui.shopTab==='bought' ? ['Nic jeszcze nie kupiono','Zaznacz kółko przy rzeczy, żeby oznaczyć ją jako kupioną.'] :
+      ['Lista do kupienia jest pusta','Dodaj rzecz, wklej link, wpisz cenę i ustaw priorytet.'];
+    L.innerHTML = `<div class="empty"><div class="em-ic"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg></div><h2>${msg[0]}</h2><p>${msg[1]}</p></div>`;
+    return;
+  }
+  if(ui.shopTab==='bought'){
+    list.sort((a,b)=>new Date(b.boughtAt||0)-new Date(a.boughtAt||0));
+    const spent = sumPrice(list);
+    L.innerHTML = (spent?`<section class="grp"><div class="grp-h">Wydano<span class="grp-sum">${fmtPrice(spent)}</span></div>`:'<section class="grp">') + list.map(itemCard).join('') + '</section>';
+    return;
+  }
+  let html='', i=0;
+  for(const k of PRIO_ORDER){
+    const g = list.filter(it=>(it.prio||'mid')===k);
+    if(!g.length) continue;
+    const sum = sumPrice(g);
+    html += `<section class="grp"><div class="grp-h"><i style="background:${PRIO[k].color}"></i>${PRIO[k].group}<span class="grp-sum">${sum?fmtPrice(sum):''}</span></div>${g.map(it=>itemCard(it,i++)).join('')}</section>`;
+  }
+  L.innerHTML = html;
+}
+function renderPrioChips(){
+  $('prioChips').innerHTML = PRIO_ORDER.map(k=>`<button class="chip ${ui.prio===k?'on':''}" onclick="ui.prio='${k}';renderPrioChips()"><i style="background:${PRIO[k].color}"></i>${PRIO[k].label}</button>`).join('');
+}
+let nameAuto = false;
+function openItem(id){ openItemSheet(S.items.find(x=>x.id===id)) }
+function openItemSheet(it){
+  ui.itemId = it?it.id:null;
+  $('itemTitle').textContent = it?'Edytuj':'Do kupienia';
+  $('iSave').textContent = it?'Zapisz zmiany':'Dodaj do listy';
+  $('iName').value = it?it.name:''; $('iUrl').value = it?(it.url||''):'';
+  $('iPrice').value = it&&it.price!=null ? Number(it.price).toFixed(2).replace('.',',') : '';
+  $('iNote').value = it?(it.note||''):'';
+  ui.prio = it?(it.prio||'mid'):'mid'; nameAuto = false;
+  renderPrioChips();
+  $('itemActions').innerHTML = it ? `
+    ${it.url?`<a class="btn btn-s" href="${esc(it.url)}" target="_blank" rel="noopener" style="text-decoration:none">Otwórz link ↗</a>`:''}
+    <button class="btn btn-s" onclick="toggleBought('${it.id}',true)">${it.bought?'Przywróć na listę':'✓ Kupione'}</button>
+    ${it.bought?`<button class="btn btn-s" onclick="itemToParcel()">Śledź przesyłkę</button>`:''}
+    <button class="btn btn-d" onclick="delItem()">Usuń</button>` : '';
+  openSheet('itemSheet');
+  if(!it) setTimeout(()=>$('iName').focus(),350);
+}
+function onUrlChange(){
+  const u = normUrl($('iUrl').value);
+  if(u && (!$('iName').value.trim() || nameAuto)){ const n=nameFromUrl(u); if(n){ $('iName').value=n; nameAuto=true } }
+}
+$('iUrl').addEventListener('change', onUrlChange);
+$('iUrl').addEventListener('paste', ()=>setTimeout(onUrlChange,0));
+$('iName').addEventListener('input', ()=>{ nameAuto=false });
+async function pasteUrl(){
+  try{ const t = await navigator.clipboard.readText(); if(t){ $('iUrl').value = normUrl(t)||t.trim(); onUrlChange() } }
+  catch{ toast('Brak dostępu do schowka — wklej ręcznie') }
+}
+function saveItem(){
+  const url = normUrl($('iUrl').value);
+  if($('iUrl').value.trim() && !url){ toast('Nieprawidłowy link'); $('iUrl').focus(); return }
+  let name = $('iName').value.trim() || nameFromUrl(url) || hostOf(url);
+  if(!name){ toast('Wpisz, co chcesz kupić'); $('iName').focus(); return }
+  const price = parsePrice($('iPrice').value);
+  if($('iPrice').value.trim() && price==null){ toast('Nieprawidłowa cena'); $('iPrice').focus(); return }
+  const data = {name, url, price, prio:ui.prio, note:$('iNote').value.trim()};
+  if(ui.itemId){
+    const it = S.items.find(x=>x.id===ui.itemId); Object.assign(it, data); touch(it);
+  }else{
+    S.items.unshift({id:uid(), ...data, bought:false, boughtAt:null, created:new Date().toISOString(), u:Date.now()});
+    if(ui.shopTab!=='todo'){ ui.shopTab='todo'; renderTabs(); moveInd() }
+  }
+  save(); render(); closeSheet('itemSheet');
+  toast(ui.itemId?'Zapisano ✓':'Dodano do listy ✓');
+}
+function toggleBought(id, fromSheet){
+  const it = S.items.find(x=>x.id===id); if(!it) return;
+  it.bought = !it.bought; it.boughtAt = it.bought ? new Date().toISOString() : null; touch(it);
+  save(); render();
+  if(fromSheet) closeSheet('itemSheet');
+  if(navigator.vibrate) navigator.vibrate(15);
+  toast(it.bought ? 'Kupione ✓' : 'Przywrócono na listę');
+}
+function delItem(){
+  const it = S.items.find(x=>x.id===ui.itemId); if(!it) return;
+  if(!confirm(`Usunąć „${it.name}” z listy?`)) return;
+  S.deleted[it.id]=Date.now(); S.items = S.items.filter(x=>x.id!==it.id);
+  save(); render(); closeSheet('itemSheet'); toast('Usunięto');
+}
+function itemToParcel(){
+  const it = S.items.find(x=>x.id===ui.itemId); if(!it) return;
+  closeSheet('itemSheet'); setView('parcels');
+  setTimeout(()=>{ openAdd(); $('fName').value = it.name; $('fNote').value = it.url||'' }, 50);
+}
 
 /* ═══ ARKUSZE ═══ */
 function openSheet(id){ $(id).classList.add('on'); document.body.style.overflow='hidden' }
@@ -611,7 +839,7 @@ function saveParcel(){
     S.parcels.unshift(p);
   }
   save(); closeSheet('addSheet');
-  if(!ui.editId && ui.tab!=='active'){ document.querySelector('[data-tab="active"]').click() }
+  if(!ui.editId && ui.tab!=='active'){ ui.tab='active'; renderTabs(); moveInd() }
   render();
   toast(ui.editId?'Zapisano ✓':'Dodano przesyłkę ✓');
   if(ui.editId && ui.detId===p.id) renderDetail();
@@ -804,7 +1032,9 @@ function importData(e){
   r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!Array.isArray(d.parcels)) throw 0;
     const have=new Set(S.parcels.map(p=>p.number)); let n=0;
     for(const p of d.parcels){ if(p&&p.number&&!have.has(p.number)){ S.parcels.push({events:[],status:'unknown',...p,id:p.id||uid(),u:Date.now()}); n++ } }
-    save(); render(); toast(`Zaimportowano ${n} ${plural(n,'przesyłkę','przesyłki','przesyłek')}`);
+    const haveIt=new Set(S.items.map(x=>x.id));
+    for(const it of (d.items||[])){ if(it&&it.name&&!haveIt.has(it.id)){ S.items.push({...it,id:it.id||uid(),u:Date.now()}); n++ } }
+    save(); render(); toast(`Zaimportowano ${n} ${plural(n,'pozycję','pozycje','pozycji')}`);
   }catch{ toast('Nieprawidłowy plik') } };
   r.readAsText(f); e.target.value='';
 }
@@ -862,7 +1092,7 @@ function closeScan(){
 
 /* ═══ START ═══ */
 (async function init(){
-  load(); render(); moveInd();
+  load(); setView(S.settings.view==='shop'?'shop':'parcels');
   setTimeout(moveInd, 300);
   await syncNow(false);
   setupAuto();
