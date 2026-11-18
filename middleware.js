@@ -1,7 +1,8 @@
 // Hasło do aplikacji — sprawdzane na serwerze Vercel, zanim cokolwiek się wczyta.
 // Hasło ustawiasz w Vercel: Settings → Environment Variables → APP_PASSWORD.
 
-export const config = { matcher: ['/((?!favicon\\.ico).*)'] };
+// ikony i manifest muszą być dostępne bez logowania (iPhone pobiera je przy dodawaniu na ekran główny)
+export const config = { matcher: ['/((?!favicon\\.ico|favicon-32\\.png|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|icon\\.svg|manifest\\.webmanifest).*)'] };
 
 const COOKIE = 'przesylki_auth';
 const YEAR = 60 * 60 * 24 * 365;
@@ -33,16 +34,19 @@ function page(body, status = 200, headers = {}) {
     `<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Przesyłki">
+<meta name="apple-mobile-web-app-title" content="Nasze mieszkanie">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta name="robots" content="noindex">
-<title>Przesyłki</title>
+<title>Nasze mieszkanie</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{color-scheme:light;--bg:#f3f3f0;--s1:#fff;--t1:#141414;--t2:#5d5d58;--bord:#e3e2dd;--acc:#141414;--acc-t:#fff;--err:#d42626}
 @media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0d0d0d;--s1:#171717;--t1:#f2f2f2;--t2:#a3a3a3;--bord:#252525;--acc:#f2f2f2;--acc-t:#111;--err:#f87171}}
 body{min-height:100vh;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px;-webkit-font-smoothing:antialiased}
 .box{width:100%;max-width:360px}
-.ic{width:64px;height:64px;border-radius:18px;background:var(--s1);border:1px solid var(--bord);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.ic{width:72px;height:72px;border-radius:18px;display:block;margin-bottom:22px}
 h1{font-size:28px;font-weight:800;letter-spacing:-.6px}
 p{font-size:15px;color:var(--t2);margin:6px 0 24px;line-height:1.45}
 input{width:100%;height:52px;border-radius:14px;border:1px solid var(--bord);background:var(--s1);color:var(--t1);padding:0 16px;font-size:17px;outline:none;-webkit-appearance:none;font-family:inherit}
@@ -51,7 +55,7 @@ button{width:100%;height:52px;border-radius:14px;border:0;background:var(--acc);
 .err{color:var(--err);font-size:14px;font-weight:600;margin-top:12px}
 code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bord);padding:2px 6px;border-radius:6px;color:var(--t1)}
 </style></head><body><div class="box">
-<div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg></div>
+<img class="ic" src="/icon-192.png" alt="" width="72" height="72">
 ${body}</div></body></html>`,
     { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', ...headers } }
   );
@@ -59,7 +63,7 @@ ${body}</div></body></html>`,
 
 function loginPage(error) {
   return page(
-    `<h1>Przesyłki</h1><p>Wpisz hasło, żeby wejść.</p>
+    `<h1>Nasze mieszkanie</h1><p>Wpisz hasło, żeby wejść.</p>
 <form method="POST" action="/__login">
 <input type="password" name="password" placeholder="Hasło" autocomplete="current-password" autofocus required>
 <button type="submit">Wejdź</button>
