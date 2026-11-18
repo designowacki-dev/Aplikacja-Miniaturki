@@ -57,10 +57,10 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 /* pasek górny: biała pigułka z sekcjami + okrągły przycisk ustawień */
 .top{position:sticky;top:0;z-index:30;display:flex;gap:10px;align-items:center;margin:0 -18px;padding:calc(12px + var(--safe-t)) 18px 12px;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
 .views{flex:1;display:flex;gap:4px;min-width:0;background:var(--s1);border-radius:30px;padding:5px;box-shadow:var(--shadow)}
-.vw{position:relative;flex:1;min-width:44px;height:46px;border-radius:24px;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:7px;font-size:15px;font-weight:500;white-space:nowrap;transition:flex .45s var(--e-drawer),background .3s var(--e-out),color .3s var(--e-out)}
+.vw{position:relative;flex:1;min-width:38px;height:46px;border-radius:24px;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:7px;font-size:15px;font-weight:500;white-space:nowrap;transition:flex .45s var(--e-drawer),background .3s var(--e-out),color .3s var(--e-out)}
 .vw svg{flex-shrink:0}
 .vw span{display:none}
-.vw.on{flex:2.4;background:var(--navy);color:var(--navy-t)}
+.vw.on{flex:0 0 auto;padding:0 14px 0 13px;background:var(--navy);color:var(--navy-t)}
 .vw.on span{display:inline;animation:lblIn .35s var(--e-out)}
 @keyframes lblIn{from{opacity:0;transform:translateX(-4px)}}
 .vw b{position:absolute;top:6px;right:calc(50% - 20px);font-size:10px;font-weight:600;line-height:15px;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--navy);color:var(--navy-t)}
@@ -98,6 +98,49 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 .t-txt{flex:1;min-width:0}
 .t-txt b{display:block;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .t-txt span{display:block;font-size:13px;opacity:.65;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* bento jak ekran startowy wzoru */
+.bento{display:flex;flex-direction:column;gap:12px;margin:6px 0 18px}
+.hero{position:relative;overflow:hidden;background:var(--navy);color:var(--navy-t);border-radius:26px;padding:18px 20px 20px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:156px;box-shadow:var(--shadow);transition:transform .25s var(--e-out);animation:tileIn .45s var(--e-out) both}
+.hero:active{transform:scale(.98)}
+.h-art{position:absolute;right:-8px;top:50%;transform:translateY(-50%) rotate(-8deg);width:138px;height:138px;opacity:.16;pointer-events:none}
+.h-art svg{width:100%;height:100%}
+.h-l{font-size:13px;color:var(--navy-t2)}
+.h-n{font-size:54px;font-weight:500;line-height:1;margin:10px 0 10px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.h-n small{font-size:22px;font-weight:400;margin-left:2px}
+.h-d{font-size:13px;color:var(--navy-t2);max-width:66%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;first-letter:uppercase}
+.h-d::first-letter{text-transform:uppercase}
+.h-t{font-size:15px;font-weight:500;margin-top:3px;max-width:66%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovw{background:var(--sky);color:var(--sky-t);border-radius:26px;padding:16px 18px 14px;box-shadow:var(--shadow);animation:tileIn .45s var(--e-out) .05s both}
+.ovw-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ovw-h b{font-size:15px;font-weight:500}
+.ovw-m{display:grid;grid-template-columns:repeat(3,1fr)}
+.met{display:flex;flex-direction:column;text-align:left;padding:0 12px;color:inherit;border-left:1px solid color-mix(in srgb,var(--sky-t) 14%,transparent);min-width:0}
+.met:first-child{border-left:0;padding-left:0}
+.met-l{font-size:12px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.met-n{font-size:28px;font-weight:500;line-height:1;margin:8px 0 6px;font-variant-numeric:tabular-nums}
+.met-f{display:flex;justify-content:space-between;align-items:center;gap:4px}
+.met-f small{font-size:11px;opacity:.55;white-space:nowrap}
+.met-f i{display:flex}
+.qa{background:var(--s1);border-radius:26px;padding:16px 16px 18px;box-shadow:var(--shadow);animation:tileIn .45s var(--e-out) .1s both}
+.qa-h{font-size:15px;font-weight:500;margin:0 2px 14px}
+.qa-g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.qa-b{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;color:var(--t1);text-align:center;transition:transform .2s var(--e-out)}
+.qa-b:active{transform:scale(.93)}
+.qa-i{width:56px;height:56px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--t1)}
+.qa-b.on .qa-i{background:var(--sky);color:var(--link)}
+/* szczegóły paczki: rząd ikon + główna akcja */
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 16px}
+.feat button,.feat a{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;color:var(--t1);text-decoration:none;transition:transform .2s var(--e-out)}
+.feat button:active,.feat a:active{transform:scale(.93)}
+.feat .qa-i{background:var(--s1);box-shadow:var(--shadow)}
+.feat button:disabled{opacity:.5}
+.cta{display:flex;align-items:center;justify-content:space-between;width:100%;height:66px;border-radius:33px;background:var(--navy);color:var(--navy-t);padding:0 9px 0 24px;font-size:16px;font-weight:500;margin-top:16px;transition:transform .2s var(--e-out)}
+.cta:active{transform:scale(.98)}
+.cta i{width:48px;height:48px;border-radius:50%;background:var(--navy-t);color:var(--navy);display:flex;align-items:center;justify-content:center}
+.links{display:flex;justify-content:center;gap:30px;margin-top:16px}
+.links button{font-size:15px;color:var(--t2)}
+.links .del{color:var(--c-problem)}
 
 /* wyszukiwanie + segmenty */
 .search-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
@@ -142,6 +185,8 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 /* główny przycisk: granatowa pigułka z białym kółkiem */
 .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + var(--safe-b));z-index:20;height:60px;padding:0 8px 0 24px;border-radius:30px;background:var(--navy);color:var(--navy-t);font-size:16px;font-weight:500;display:flex;align-items:center;gap:18px;white-space:nowrap;box-shadow:0 16px 36px -14px rgba(14,31,69,.6);transition:transform .25s var(--e-out)}
 .fab:active{transform:translateX(-50%) scale(.96)}
+.fab{transition:transform .45s var(--e-drawer),opacity .3s}
+.fab.hide{transform:translate(-50%,140%);opacity:0;pointer-events:none}
 .fab-ic{width:44px;height:44px;border-radius:50%;background:var(--navy-t);color:var(--navy);display:flex;align-items:center;justify-content:center}
 
 /* arkusze */
@@ -304,7 +349,7 @@ textarea.in{height:auto;min-height:84px;padding:14px 18px;resize:vertical}
   <main id="list"></main>
 </div>
 
-<button class="fab" onclick="openAddCurrent()"><span id="fabTxt">Dodaj przesyłkę</span><i class="fab-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></i></button>
+<button class="fab hide" id="fab" onclick="openAddCurrent()"><span id="fabTxt">Dodaj przesyłkę</span><i class="fab-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></i></button>
 
 <!-- LISTA ZAKUPÓW -->
 <div class="sw" id="grocSheet"><div class="sw-bg" onclick="closeSheet('grocSheet')"></div>
@@ -660,55 +705,150 @@ const IC = {
   check:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg>',
   bag:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>',
 };
-const GO = '<span class="t-go"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
-function tile({cls='', color, icon, n, label, list, act, i=0, money=false}){
-  return `<button class="tile ${cls} ${(!money && !n)?'zero':''}" style="--tc:${color};animation-delay:${i*40}ms" onclick="${act}">
-    <span class="t-ic">${icon}</span>${GO}
-    <span class="t-body"><div class="t-n ${money?'money':''}">${n}</div><div class="t-l">${label}</div>${list?`<div class="t-list">${list}</div>`:''}</span>
+/* ═══ BENTO (układ jak ekran startowy wzoru): karta główna, przegląd, szybki dostęp ═══ */
+const ART = {
+  parcel:'<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M60 14 104 36v48L60 106 16 84V36z"/><path d="m16 36 44 22 44-22M60 58v48M38 25l44 22v18"/></svg>',
+  heart:'<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M101 25a24 24 0 0 0-34 0l-7 7-7-7a24 24 0 0 0-34 34l41 41 41-41a24 24 0 0 0 0-34z"/><path d="M40 42a10 10 0 0 1 10-6"/></svg>',
+  cart:'<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18h14l12 58a6 6 0 0 0 6 5h46a6 6 0 0 0 6-5l9-40H30"/><circle cx="46" cy="98" r="7"/><circle cx="86" cy="98" r="7"/><path d="M52 52h34M56 66h26"/></svg>',
+  tasks:'<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="20" y="22" width="80" height="84" rx="14"/><path d="M42 14v16M78 14v16M20 44h80"/><path d="m40 74 12 12 26-26"/></svg>',
+};
+const pad2 = n => String(n).padStart(2,'0');
+function longDate(ymd){ // „Listopad 2026, środa”
+  const d = new Date(ymd+'T00:00');
+  const m = d.toLocaleDateString('pl-PL',{month:'long'});
+  return `${m.charAt(0).toUpperCase()+m.slice(1)} ${d.getFullYear()}, ${d.toLocaleDateString('pl-PL',{weekday:'long'})}`;
+}
+function hero({label, n, lines=[], art, act}){
+  return `<button class="hero" onclick="${act}">
+    <span class="h-art">${ART[art]}</span>
+    <span class="h-l">${esc(label)}</span>
+    <span class="h-n">${n}</span>
+    ${lines.filter(Boolean).map((l,i)=>`<span class="h-${i?'t':'d'}">${esc(l)}</span>`).join('')}
   </button>`;
 }
-function wideTile({color, icon, title, sub, act, i=3}){
-  return `<button class="tile wide" style="--tc:${color};animation-delay:${i*40}ms" onclick="${act}">
-    <span class="t-ic">${icon}</span><span class="t-txt"><b>${esc(title)}</b><span>${esc(sub)}</span></span>${GO}</button>`;
+function overview(title, metrics){
+  return `<section class="ovw"><div class="ovw-h"><b>${esc(title)}</b></div><div class="ovw-m">${metrics.map(m=>`
+    <button class="met" onclick="${m.act}"><span class="met-l">${esc(m.label)}</span><span class="met-n">${m.n}</span><span class="met-f"><small>${esc(m.unit||'')}</small><i style="color:${m.color}">${m.icon}</i></span></button>`).join('')}</div></section>`;
 }
+function quick(items){
+  return `<section class="qa"><div class="qa-h">Szybki dostęp</div><div class="qa-g">${items.map((q,i)=>`
+    <button class="qa-b ${i===0?'on':''}" onclick="${q.act}"><span class="qa-i">${q.icon}</span><span>${esc(q.label)}</span></button>`).join('')}</div></section>`;
+}
+const QI = {
+  plus:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  scan:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M10 8v8M14 8v8M17 8v8"/></svg>',
+  refresh:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>',
+  archive:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg>',
+  link:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
+  flame:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 6.5-2.6 6.5-6.2 0-3.5-2.6-5.7-4-9.3-2.2 1.6-3 3.7-3 5.4-1-.6-1.7-1.7-1.9-3C7.4 9.6 5.5 12 5.5 14.8 5.5 18.4 8 21 12 21z"/></svg>',
+  bag:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>',
+  check:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  trash:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  search:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  sun:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  alert:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>',
+};
+const MI = { // małe ikony w przeglądzie
+  box:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>',
+  truck:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
+  ok:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  heart:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>',
+  flame:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 6.5-2.6 6.5-6.2 0-3.5-2.6-5.7-4-9.3-2.2 1.6-3 3.7-3 5.4-1-.6-1.7-1.7-1.9-3C7.4 9.6 5.5 12 5.5 14.8 5.5 18.4 8 21 12 21z"/></svg>',
+  grid:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
+  cal:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  alert:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>',
+};
+const shortPLN = n => n>=10000 ? (Math.round(n/100)/10).toString().replace('.',',')+' tys.' : Math.round(n).toString();
+function monthStart(){ const m=new Date(); m.setDate(1); m.setHours(0,0,0,0); return m }
+
 function renderBento(){
   const B = $('bento');
-  if(ui.view==='groc'){ B.innerHTML = bentoGroc(); return }
-  if(ui.view==='tasks'){ B.innerHTML = bentoTasks(); return }
   if(ui.view==='shop'){
     const todo = S.items.filter(it=>!it.bought);
     const high = todo.filter(it=>(it.prio||'mid')==='high');
-    const m0 = new Date(); m0.setDate(1); m0.setHours(0,0,0,0);
-    const boughtM = S.items.filter(it=>it.bought && it.boughtAt && new Date(it.boughtAt)>=m0);
-    const priciest = [...todo].filter(it=>it.price!=null).sort((a,b)=>b.price-a.price)[0];
+    const spent = sumPrice(S.items.filter(it=>it.bought && it.boughtAt && new Date(it.boughtAt)>=monthStart()));
+    const total = sumPrice(todo);
+    const top = [...todo].sort((a,b)=>PRIO_ORDER.indexOf(a.prio||'mid')-PRIO_ORDER.indexOf(b.prio||'mid'))[0];
     B.innerHTML =
-      tile({cls:'big', color:'var(--link)', icon:IC.wallet, n:fmtPrice(sumPrice(todo))||'0 zł', money:true,
-        label:`do wydania · ${todo.length} ${plural(todo.length,'rzecz','rzeczy','rzeczy')}`,
-        list: todo.slice(0,3).map(it=>`<span>${esc(it.name)}</span>`).join(''), act:"goShop('todo')", i:0}) +
-      tile({color:'var(--c-problem)', icon:IC.flame, n:high.length, label:'Wysoki priorytet', act:"goShop('todo','high')", i:1}) +
-      tile({color:'var(--c-delivered)', icon:IC.bag, n:fmtPrice(sumPrice(boughtM))||'0 zł', money:true, label:'Wydano w tym miesiącu', act:"goShop('bought')", i:2}) +
-      (priciest ? wideTile({color:'var(--c-out)', icon:IC.wallet, title:priciest.name, sub:`Najdroższa rzecz · ${fmtPrice(priciest.price)}`, act:`openItem('${priciest.id}')`})
-                : wideTile({color:'var(--c-pending)', icon:IC.bag, title:'Dodaj coś do listy', sub:'Wklej link, wpisz cenę i priorytet', act:'openItemSheet(null)'}));
+      hero({label:'Do wydania', n:shortPLN(total)+'<small> zł</small>', lines:[top?top.name:'Lista jest pusta', todo.length?`${todo.length} ${plural(todo.length,'rzecz','rzeczy','rzeczy')}`:''], art:'heart', act:"goShop('todo')"}) +
+      overview('Przegląd', [
+        {label:'Pilne', n:high.length, unit:'szt.', icon:MI.flame, color:'var(--c-problem)', act:"goShop('todo','high')"},
+        {label:'Na liście', n:todo.length, unit:'szt.', icon:MI.heart, color:'var(--link)', act:"goShop('todo')"},
+        {label:'Wydano', n:shortPLN(spent), unit:'zł / mies.', icon:MI.ok, color:'var(--c-delivered)', act:"goShop('bought')"},
+      ]) +
+      quick([
+        {icon:QI.plus, label:'Dodaj', act:'openItemSheet(null)'},
+        {icon:QI.link, label:'Wklej link', act:'openItemSheet(null);pasteUrl()'},
+        {icon:QI.flame, label:'Pilne', act:"goShop('todo','high')"},
+        {icon:QI.bag, label:'Kupione', act:"goShop('bought')"},
+      ]);
+    return;
+  }
+  if(ui.view==='groc'){
+    const todo = S.groceries.filter(g=>!g.done), done = S.groceries.filter(g=>g.done);
+    const cats = [...new Set(todo.map(g=>g.cat||'other'))];
+    B.innerHTML =
+      hero({label:'Lista zakupów', n:pad2(todo.length), lines:[todo.length?cats.map(k=>GC[k].emoji).join(' '):'Wszystko kupione', todo.slice(0,2).map(g=>g.name).join(', ')], art:'cart', act:"scrollToGrp('none')"}) +
+      overview('Przegląd', [
+        {label:'Do kupienia', n:todo.length, unit:'szt.', icon:MI.box, color:'var(--link)', act:"scrollToGrp('none')"},
+        {label:'W koszyku', n:done.length, unit:'szt.', icon:MI.ok, color:'var(--c-delivered)', act:"scrollToGrp('done')"},
+        {label:'Kategorie', n:cats.length, unit:'', icon:MI.grid, color:'var(--c-out)', act:"scrollToGrp('none')"},
+      ]) +
+      quick([
+        {icon:QI.plus, label:'Dodaj', act:'openGrocSheet(null)'},
+        {icon:QI.check, label:'W koszyku', act:"scrollToGrp('done')"},
+        {icon:QI.trash, label:'Wyczyść', act:'clearGrocDone()'},
+        {icon:QI.search, label:'Szukaj', act:"$('q').focus()"},
+      ]);
+    return;
+  }
+  if(ui.view==='tasks'){
+    const open = S.tasks.filter(t=>!t.done).sort(taskSort);
+    const today = open.filter(t=>taskBucket(t)==='today'), late = open.filter(t=>taskBucket(t)==='late');
+    const doneM = S.tasks.filter(t=>t.done && t.doneAt && new Date(t.doneAt)>=monthStart()).length;
+    const next = open.find(t=>t.due && dayDiff(t.due)>=0);
+    const h = next
+      ? hero({label:'Najbliższe zadanie', n:pad2(new Date(next.due+'T00:00').getDate()), lines:[longDate(next.due), [next.title, next.time].filter(Boolean).join(' · ')], art:'tasks', act:`openTask('${next.id}')`})
+      : hero({label:'Zadania Marcin', n:pad2(open.length), lines:[open.length?open[0].title:'Wszystko zrobione'], art:'tasks', act:"goTasks('open')"});
+    B.innerHTML = h +
+      overview('Przegląd', [
+        {label:'Na dziś', n:today.length, unit:'zadań', icon:MI.cal, color:'var(--c-out)', act:"goTasks('open','today')"},
+        {label:'Po terminie', n:late.length, unit:'zadań', icon:MI.alert, color:'var(--c-problem)', act:"goTasks('open','late')"},
+        {label:'Zrobione', n:doneM, unit:'w mies.', icon:MI.ok, color:'var(--c-delivered)', act:"goTasks('done')"},
+      ]) +
+      quick([
+        {icon:QI.plus, label:'Dodaj', act:'openTaskSheet(null)'},
+        {icon:QI.sun, label:'Dziś', act:"goTasks('open','today')"},
+        {icon:QI.alert, label:'Zaległe', act:"goTasks('open','late')"},
+        {icon:QI.check, label:'Zrobione', act:"goTasks('done')"},
+      ]);
     return;
   }
   const act = S.parcels.filter(p=>inTab(p,'active'));
   const by = k => act.filter(p=>(p.status||'unknown')===k);
-  const pick = by('pickup'), out = by('out'), prob = by('problem');
-  const moving = act.filter(p=>['transit','pending','unknown'].includes(p.status||'unknown'));
+  const pick = by('pickup'), out = by('out');
+  const moving = act.filter(p=>['transit','pending','unknown','problem'].includes(p.status||'unknown'));
+  const doneM = S.parcels.filter(p=>p.status==='delivered' && p.lastChange && new Date(p.lastChange)>=monthStart()).length;
   const next = moving.filter(p=>dayDiff(p.eta)!==null && dayDiff(p.eta)>=0).sort((a,b)=>dayDiff(a.eta)-dayDiff(b.eta))[0];
-  const m0 = new Date(); m0.setDate(1); m0.setHours(0,0,0,0);
-  const doneM = S.parcels.filter(p=>p.status==='delivered' && p.lastChange && new Date(p.lastChange)>=m0).length;
-  let wide;
-  if(prob.length) wide = wideTile({color:'var(--c-problem)', icon:IC.problem, title:`${prob.length} ${plural(prob.length,'paczka wymaga','paczki wymagają','paczek wymaga')} uwagi`, sub:prob.map(p=>p.name||p.number).join(', '), act:"goParcels('problem')"});
-  else if(next){ const d=dayDiff(next.eta); wide = wideTile({color:'var(--c-transit)', icon:IC.cal, title:next.name||next.number, sub:`Najbliższa dostawa · ${d===0?'dziś':d===1?'jutro':`za ${d} dni`}`, act:`openDetail('${next.id}')`}) }
-  else wide = wideTile({color:'var(--c-delivered)', icon:IC.ok, title:`Odebrane w tym miesiącu: ${doneM}`, sub:act.length?'Brak przewidywanych dat dostawy':'Wszystko odebrane', act:"goParcels(null,'delivered')"});
-  B.innerHTML =
-    tile({cls:'big', color:'var(--c-pickup)', icon:IC.pickup, n:pick.length, label:'Do odbioru',
-      list: pick.length ? pick.slice(0,3).map(p=>`<span>${esc(p.name||p.number)}</span>`).join('') : '<span style="color:var(--t2)">Nic nie czeka</span>', act:"goParcels('pickup')", i:0}) +
-    tile({color:'var(--c-out)', icon:IC.out, n:out.length, label:'Dziś u Ciebie', act:"goParcels('out')", i:1}) +
-    tile({color:'var(--c-transit)', icon:IC.transit, n:moving.length, label:'W drodze', act:"goParcels('transit')", i:2}) +
-    wide;
+  let h;
+  if(pick.length) h = hero({label:'Do odbioru', n:pad2(pick.length), lines:[pick[0].pickupPoint||CARRIERS[pick[0].carrier]?.name||'', pick.map(p=>p.name||p.number).slice(0,2).join(', ')], art:'parcel', act:"goParcels('pickup')"});
+  else if(out.length) h = hero({label:'Dziś u Ciebie', n:pad2(out.length), lines:['Kurier w drodze', out.map(p=>p.name||p.number).slice(0,2).join(', ')], art:'parcel', act:"goParcels('out')"});
+  else if(next){ const d=dayDiff(next.eta); h = hero({label:'Najbliższa dostawa', n:pad2(new Date(next.eta+'T00:00').getDate()), lines:[longDate(next.eta), next.name||next.number], art:'parcel', act:`openDetail('${next.id}')`}) }
+  else h = hero({label:'Aktywne przesyłki', n:pad2(act.length), lines:[act.length?'W drodze':'Wszystko odebrane'], art:'parcel', act:"goParcels(null)"});
+  B.innerHTML = h +
+    overview('Przegląd', [
+      {label:'W drodze', n:moving.length, unit:'paczki', icon:MI.box, color:'var(--link)', act:"goParcels('transit')"},
+      {label:'Dziś', n:out.length, unit:'kurier', icon:MI.truck, color:'var(--c-out)', act:"goParcels('out')"},
+      {label:'Odebrane', n:doneM, unit:'w mies.', icon:MI.ok, color:'var(--c-delivered)', act:"goParcels(null,'delivered')"},
+    ]) +
+    quick([
+      {icon:QI.plus, label:'Dodaj', act:'openAdd()'},
+      {icon:QI.scan, label:'Skanuj', act:'openAdd();openScan()'},
+      {icon:QI.refresh, label:'Odśwież', act:'refreshAll(true)'},
+      {icon:QI.archive, label:'Archiwum', act:"goParcels(null,'archived')"},
+    ]);
 }
+
 function scrollToGrp(id){
   const el = $('g-'+id);
   if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
@@ -799,12 +939,13 @@ function setView(v){
   document.querySelectorAll('.vw').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
   $('q').placeholder = VIEW[v].ph;
   $('fabTxt').textContent = VIEW[v].fab;
-  $('refreshAll').style.display = v==='parcels' ? '' : 'none';
+  $('refreshAll').style.display = 'none';
   ui.q=''; $('q').value='';
   renderTabs(); render(); moveInd();
-  window.scrollTo({top:0});
+  window.scrollTo({top:0}); setTimeout(fabVis, 50);
 }
-addEventListener('scroll',()=>$('top').classList.toggle('scrolled', scrollY>4), {passive:true});
+function fabVis(){ const b=$('bento').getBoundingClientRect(); $('fab').classList.toggle('hide', b.bottom > 120) }
+addEventListener('scroll',()=>{ $('top').classList.toggle('scrolled', scrollY>4); fabVis() }, {passive:true});
 $('views').addEventListener('click',e=>{ const b=e.target.closest('.vw'); if(b && b.dataset.view!==ui.view) setView(b.dataset.view) });
 function openAddCurrent(){ ({shop:()=>openItemSheet(null), groc:()=>openGrocSheet(null), tasks:()=>openTaskSheet(null)}[ui.view] || openAdd)() }
 $('q').addEventListener('input',e=>{ui.q=e.target.value; render()});
@@ -1153,28 +1294,6 @@ function delTask(){
   save(); render(); closeSheet('taskSheet'); toast('Usunięto');
 }
 
-/* ═══ BENTO: zakupy + zadania ═══ */
-function bentoGroc(){
-  const todo = S.groceries.filter(g=>!g.done), done = S.groceries.filter(g=>g.done);
-  const cats = new Set(todo.map(g=>g.cat||'other'));
-  return tile({cls:'big', color:'var(--c-delivered)', icon:IC.bag, n:todo.length, label:'Lista zakupów',
-      list: todo.length ? todo.slice(0,3).map(g=>`<span>${esc(g.name)}</span>`).join('') : '<span style="color:var(--t2)">Pusto</span>', act:"scrollToGrp('none')", i:0}) +
-    tile({color:'var(--c-transit)', icon:IC.ok, n:done.length, label:'W koszyku', act:"scrollToGrp('done')", i:1}) +
-    tile({color:'var(--c-out)', icon:IC.grid, n:cats.size, label:cats.size?[...cats].map(k=>GC[k].emoji).join(' '):'Kategorie', act:"scrollToGrp('none')", i:2}) +
-    (done.length ? wideTile({color:'var(--c-problem)', icon:IC.trash, title:`Wyczyść koszyk (${done.length})`, sub:'Usuń odhaczone produkty z listy', act:'clearGrocDone()'})
-                 : wideTile({color:'var(--c-delivered)', icon:IC.plus, title:'Dodaj produkty', sub:'Kategoria dobierze się sama', act:'openGrocSheet(null)'}));
-}
-function bentoTasks(){
-  const open = S.tasks.filter(t=>!t.done).sort(taskSort);
-  const today = open.filter(t=>taskBucket(t)==='today'), late = open.filter(t=>taskBucket(t)==='late');
-  const next = open.find(t=>t.due && dayDiff(t.due)>=0);
-  return tile({cls:'big', color:'var(--link)', icon:IC.check, n:open.length, label:'Zadania Marcin',
-      list: open.length ? open.slice(0,3).map(t=>`<span>${esc(t.title)}</span>`).join('') : '<span style="color:var(--t2)">Wszystko zrobione</span>', act:"goTasks('open')", i:0}) +
-    tile({color:'var(--c-out)', icon:IC.cal, n:today.length, label:'Na dziś', act:"goTasks('open','today')", i:1}) +
-    tile({color:'var(--c-problem)', icon:IC.problem, n:late.length, label:'Po terminie', act:"goTasks('open','late')", i:2}) +
-    (next ? wideTile({color:'var(--c-transit)', icon:IC.cal, title:next.title, sub:`Najbliższy termin · ${dueLabel(next)}`, act:`openTask('${next.id}')`})
-          : wideTile({color:'var(--link)', icon:IC.plus, title:'Dodaj zadanie', sub:'Nazwa, opis i termin', act:'openTaskSheet(null)'}));
-}
 function goTasks(tab, grp){
   ui.q=''; $('q').value='';
   if(ui.taskTab!==tab){ ui.taskTab=tab; renderTabs(); render(); moveInd() }
@@ -1281,29 +1400,31 @@ function renderDetail(){
       <div class="prog">${[0,1,2,3].map(i=>`<i class="${i<=step && p.status!=='unknown'?'on':''}" style="animation-delay:${i*80}ms"></i>`).join('')}</div>
       <div class="prog-l">${lbls.map(l=>`<span>${l}</span>`).join('')}</div>
     </div>
-    <div class="btns" style="margin:0 0 12px">
-      <button class="btn btn-s" onclick="refreshOne(S.parcels.find(x=>x.id==='${p.id}'), true, true)" ${busy?'disabled':''}>${busy?'Sprawdzam…':'Odśwież'}</button>
-      <a class="btn btn-s" href="${C.url(encodeURIComponent(p.number))}" target="_blank" rel="noopener" style="text-decoration:none">Przewoźnik ↗</a>
+    <div class="feat">
+      <button onclick="refreshOne(S.parcels.find(x=>x.id==='${p.id}'), true, true)" ${busy?'disabled':''}><span class="qa-i">${QI.refresh}</span>${busy?'Sprawdzam':'Odśwież'}</button>
+      <a href="${C.url(encodeURIComponent(p.number))}" target="_blank" rel="noopener"><span class="qa-i">${QI.link}</span>Przewoźnik</a>
+      <button onclick="copyNum('${esc(p.number)}')"><span class="qa-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></span>Kopiuj nr</button>
+      <button onclick="openEvent()"><span class="qa-i">${QI.plus}</span>Status</button>
     </div>
     <div class="info">
-      <div class="info-r"><span class="k">Numer</span><span class="v mono">${esc(p.number)}</span><button onclick="copyNum('${esc(p.number)}')">Kopiuj</button></div>
+      <div class="info-r"><span class="k">Numer</span><span class="v mono">${esc(p.number)}</span></div>
       ${p.pickupPoint?`<div class="info-r"><span class="k">Punkt odbioru</span><span class="v">${esc(p.pickupPoint)}</span></div>`:''}
       ${p.eta?`<div class="info-r"><span class="k">Przewidywana dostawa</span><span class="v">${esc(fmtDate(p.eta,false))}</span></div>`:''}
       <div class="info-r"><span class="k">Dodano</span><span class="v">${esc(fmtDate(p.created))}</span></div>
       ${p.note?`<div class="info-r"><span class="k">Notatka</span><span class="v" style="word-break:break-word">${esc(p.note)}</span></div>`:''}
     </div>
     <div class="tl">
-      <div class="tl-h"><h3>Historia</h3><button onclick="openEvent()">+ Dodaj status</button></div>
+      <div class="tl-h"><h3>Historia</h3></div>
       ${evs.length? '<div>'+evs.map(e=>`<div class="ev"><div class="ev-d"></div><div><div class="ev-t">${esc(e.text)}</div><div class="ev-m">${esc([fmtDate(e.time), e.location].filter(Boolean).join(' · '))}</div></div></div>`).join('')+'</div>'
         : `<div class="tl-empty">${p.manual
             ? `Automatyczne śledzenie ${esc(C.name)} nie jest jeszcze skonfigurowane. Sprawdź status na stronie przewoźnika i dodaj go tutaj ręcznie albo ustaw klucz 17TRACK (Ustawienia).`
             : p.lastError ? `Nie udało się pobrać statusu: ${esc(p.lastError)}` : 'Brak zdarzeń. Przewoźnik może jeszcze nie mieć danych o tej paczce.'}</div>`}
     </div>
-    <div class="btns">
-      ${p.status!=='delivered'?`<button class="btn btn-s" onclick="markDelivered()">✓ Odebrana</button>`:`<button class="btn btn-s" onclick="reopen()">Przywróć</button>`}
-      <button class="btn btn-s" onclick="toggleArchive()">${p.archived?'Z archiwum':'Archiwizuj'}</button>
-      <button class="btn btn-s" onclick="openAdd(S.parcels.find(x=>x.id==='${p.id}'))">Edytuj</button>
-      <button class="btn btn-d" onclick="delParcel()">Usuń</button>
+    <button class="cta" onclick="${p.status!=='delivered'?'markDelivered()':'reopen()'}"><span>${p.status!=='delivered'?'Oznacz jako odebraną':'Przywróć do aktywnych'}</span><i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></button>
+    <div class="links">
+      <button onclick="openAdd(S.parcels.find(x=>x.id==='${p.id}'))">Edytuj</button>
+      <button onclick="toggleArchive()">${p.archived?'Z archiwum':'Archiwizuj'}</button>
+      <button class="del" onclick="delParcel()">Usuń</button>
     </div>`;
 }
 function copyNum(n){ navigator.clipboard?.writeText(n).then(()=>toast('Skopiowano numer'),()=>toast(n)) }
