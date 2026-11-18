@@ -133,11 +133,27 @@
     placeLabels();
   }
   function placeLabels(){
-    const r = el.getBoundingClientRect();
-    for(const lab of labelsEl.children){
+    const W = el.clientWidth, H = el.clientHeight, PAD = 8, TOP = 52;
+    const items = [...labelsEl.children].map(lab => {
       const k = lab.dataset.room, [x,z] = P(...ROOMS[k].light);
       const v = new THREE.Vector3(x, .4, z).project(camera);
-      lab.style.transform = `translate(${(v.x+1)/2*r.width}px, ${(1-v.y)/2*r.height}px) translate(-50%,-50%)`;
+      return {lab, w:lab.offsetWidth, h:lab.offsetHeight, x:(v.x+1)/2*W, y:(1-v.y)/2*H};
+    }).sort((a,b) => a.y - b.y);
+    const placed = [];
+    for(const it of items){
+      // nie wychodź poza kartę i nie wchodź na licznik u góry
+      it.x = Math.min(W - it.w/2 - PAD, Math.max(it.w/2 + PAD, it.x));
+      it.y = Math.min(H - it.h/2 - PAD, Math.max(TOP + it.h/2, it.y));
+      // rozsuń etykiety, które na siebie nachodzą
+      for(let n = 0; n < 6; n++){
+        const hit = placed.find(p => Math.abs(p.x - it.x) < (p.w + it.w)/2 + 4 && Math.abs(p.y - it.y) < (p.h + it.h)/2 + 4);
+        if(!hit) break;
+        const down = hit.y + (hit.h + it.h)/2 + 4;
+        if(down + it.h/2 <= H - PAD) it.y = down;
+        else it.y = hit.y - (hit.h + it.h)/2 - 4;
+      }
+      placed.push(it);
+      it.lab.style.transform = `translate(${it.x}px, ${it.y}px) translate(-50%,-50%)`;
     }
   }
 
@@ -160,7 +176,7 @@
       lab.textContent = st.label || '';
       lab.classList.toggle('on', !!st.on); lab.classList.toggle('sel', lab.dataset.room === state.selected);
     }
-    kick();
+    needs = true; kick();
   }
 
   window.Home3D = { build, update, kick, resize };

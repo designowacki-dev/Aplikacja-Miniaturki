@@ -346,6 +346,8 @@ textarea.in{height:auto;min-height:84px;padding:14px 18px;resize:vertical}
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(92px + var(--safe-b));transform:translate(-50%,16px) scale(.96);opacity:0;transition:transform .4s var(--e-drawer),opacity .25s;z-index:90;background:var(--navy);color:var(--navy-t);padding:12px 20px;border-radius:24px;font-size:14px;font-weight:500;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:0 12px 30px -10px rgba(14,31,69,.5)}
 .toast.on{transform:translate(-50%,0) scale(1);opacity:1}
+body.sheet-open .toast{bottom:auto;top:calc(12px + var(--safe-t));transform:translate(-50%,-16px) scale(.96)}
+body.sheet-open .toast.on{transform:translate(-50%,0) scale(1)}
 
 /* do kupienia, lista zakupów, zadania */
 .card.it{position:relative}
@@ -1015,6 +1017,8 @@ function renderTabs(){
 }
 function moveInd(){
   const on = document.querySelector('.tab.on'); const ind=$('tabInd'); if(!on||!ind) return;
+  const bar = $('tabs');
+  if(bar.scrollWidth > bar.clientWidth) bar.scrollTo({left: Math.max(0, on.offsetLeft - (bar.clientWidth - on.offsetWidth)/2), behavior:'smooth'});
   ind.style.width = on.offsetWidth+'px';
   ind.style.transform = `translateX(${on.offsetLeft-4}px)`;
 }
@@ -1679,8 +1683,8 @@ function delDev(){
 }
 
 /* ═══ ARKUSZE ═══ */
-function openSheet(id){ $(id).classList.add('on'); document.body.style.overflow='hidden' }
-function closeSheet(id){ $(id).classList.remove('on'); if(!document.querySelector('.sw.on')) document.body.style.overflow='' }
+function openSheet(id){ $(id).classList.add('on'); document.body.style.overflow='hidden'; document.body.classList.add('sheet-open') }
+function closeSheet(id){ $(id).classList.remove('on'); if(!document.querySelector('.sw.on')){ document.body.style.overflow=''; document.body.classList.remove('sheet-open') } }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const o=[...document.querySelectorAll('.sw.on')].pop(); if(o){ o.id==='scanSheet'?closeScan():closeSheet(o.id) } } });
 
 /* ═══ DODAWANIE / EDYCJA ═══ */
