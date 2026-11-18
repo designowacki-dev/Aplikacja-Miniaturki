@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#E2603B"/>
-  <g fill="none" stroke="#FFFFFF" stroke-linejoin="round" stroke-linecap="round">
-    <!-- domek -->
+  <rect width="512" height="512" fill="#FFC83D"/>
+  <g fill="none" stroke="#1F1B16" stroke-linejoin="round" stroke-linecap="round">
     <path d="M128 236 L256 136 L384 236 V380 H128 Z" stroke-width="30"/>
-    <!-- paczka: pudełko, wieczko i taśma -->
-    <rect x="204" y="262" width="104" height="86" rx="8" stroke-width="20"/>
-    <path d="M204 292 H308 M256 262 V292" stroke-width="20"/>
+    <circle cx="256" cy="262" r="32" stroke-width="20"/>
+    <path d="M196 362 C196 324 222 306 256 306 C290 306 316 324 316 362" stroke-width="20"/>
   </g>
 </svg>
