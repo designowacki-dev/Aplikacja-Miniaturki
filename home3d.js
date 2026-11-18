@@ -26,11 +26,13 @@
     [330,285,402,355,.38,'#d6cab8'],[550,372,646,505,.75,'#a88763'],[245,465,415,505,.45,'#2f3240'],
     [330,600,525,835,.48,'#f4efe7'],[340,770,520,828,.6,'#ffffff'],[142,527,262,585,.74,'#a88763'],
     [550,645,665,835,.95,'#e6e0d6'],[685,662,765,838,.55,'#fafafa'],[780,795,850,838,.85,'#fafafa'],
-    [895,765,935,832,.45,'#fafafa'],[940,662,1020,738,.85,'#f0f0f0'],[847,432,1030,500,.95,'#e6e0d6'],
+    [895,765,935,832,.45,'#fafafa'],[847,432,1030,500,.95,'#e6e0d6'],
   ];
   const DEVICE_SPOTS = { coffee:[892,175,.9] };   // ekspres na blacie
 
   let renderer, scene, camera, el, labelsEl, floors = {}, lights = {}, bulbs = {}, coffee, sel = null;
+  let washer, washerX = 0, drum, drumGlass, steam = [], tvScreen, tvLight, tvGlow, anim = {washer:false, coffee:false, tv:false};
+  const clock = new THREE.Clock();
   let az = -0.5, pol = 0.86, dist = 18.5, needs = true, raf = 0;
   const target = new THREE.Vector3(0, 0, 0.25);
 
@@ -87,6 +89,39 @@
     for(const f of FURN) box(...f);
     const [cx1,cy1,ch] = DEVICE_SPOTS.coffee;
     coffee = box(cx1,cy1,cx1+26,cy1+28,.32,'#2a2d38',ch,{emissive:0x000000});
+    // filiżanka i para nad ekspresem
+    box(cx1+6,cy1+30,cx1+18,cy1+42,.07,'#ffffff',ch);
+    const [sx,sz] = P(cx1+12, cy1+36);
+    for(let i=0;i<5;i++){
+      const p = new THREE.Mesh(new THREE.SphereGeometry(.035+i*.004, 10, 8), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0, depthWrite:false}));
+      p.userData = {phase:i/5, x:sx, z:sz, base:ch+.1}; p.visible = false; scene.add(p); steam.push(p);
+    }
+    // pralka z drzwiczkami i bębnem
+    washer = box(940,662,1020,738,.85,'#f2f3f5');
+    washerX = washer.position.x;
+    const [wx,wz] = P(980, 738);
+    const door = new THREE.Group(); door.position.set(wx - washerX, .42 - washer.position.y, wz - washer.position.z + .006);
+    door.add(new THREE.Mesh(new THREE.TorusGeometry(.2,.03,10,32), new THREE.MeshStandardMaterial({color:0xb9c0cc, roughness:.4, metalness:.3})));
+    drumGlass = new THREE.Mesh(new THREE.CircleGeometry(.18,32), new THREE.MeshStandardMaterial({color:0x8fa6c4, roughness:.25, emissive:0x000000}));
+    door.add(drumGlass);
+    drum = new THREE.Group(); drum.position.z = .004;
+    [['#e4572e',.1,0],['#2a55c9',.1,2.1],['#f2c94c',.1,4.2],['#ffffff',.05,1]].forEach(([c,r,a]) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(.07,.05,.01), new THREE.MeshBasicMaterial({color:c}));
+      m.position.set(Math.cos(a)*r, Math.sin(a)*r, 0); m.rotation.z = a; drum.add(m);
+    });
+    door.add(drum); washer.add(door);
+    // telewizor na szafce RTV, ekranem do sofy
+    const [tx,tz] = P(330, 487);
+    const tvBody = new THREE.Mesh(new THREE.BoxGeometry(1.15,.6,.05), new THREE.MeshStandardMaterial({color:0x15171d, roughness:.5}));
+    tvBody.position.set(tx, .45 + .06 + .3, tz); tvBody.castShadow = true; scene.add(tvBody);
+    tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.08,.53), new THREE.MeshBasicMaterial({color:0x0b0d12}));
+    tvScreen.position.set(tx, tvBody.position.y, tz - .027); tvScreen.rotation.y = Math.PI; scene.add(tvScreen);
+    tvLight = new THREE.PointLight(0x6f8cff, 0, 3, 1.8); tvLight.position.set(tx, .8, tz - .6); scene.add(tvLight);
+    // podświetlenie za telewizorem — widać, że gra, nawet od tyłu
+    tvGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.5,.85), new THREE.MeshBasicMaterial({color:0x6f8cff, transparent:true, opacity:0, depthWrite:false}));
+    tvGlow.position.set(tx, tvBody.position.y, tz + .04); scene.add(tvGlow);
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(1.0,.45), new THREE.MeshBasicMaterial({color:0x0b0d12}));
+    back.position.set(tx, tvBody.position.y, tz + .027); scene.add(back); tvGlow.userData.back = back;
 
     // obracanie palcem, przybliżanie dwoma palcami
     const pts = new Map(); let lastPinch = 0, moved = 0;
@@ -125,12 +160,33 @@
     renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
   }
   function kick(){ needs = true; if(!raf) raf = requestAnimationFrame(loop) }
+  const animating = () => anim.washer || anim.coffee || anim.tv;
+  function step(){
+    const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+    if(anim.washer){ drum.rotation.z -= dt*9; washer.position.x = washerX + Math.sin(t*55)*.006 }
+    if(anim.coffee) for(const p of steam){
+      const f = (t*.45 + p.userData.phase) % 1;
+      p.position.set(p.userData.x + Math.sin((t+p.userData.phase*6)*2.2)*.03, p.userData.base + f*.5, p.userData.z);
+      p.material.opacity = Math.sin(Math.PI*f)*.55; p.scale.setScalar(.7 + f*1.1);
+    }
+    if(anim.tv){
+      const h = (t*.06) % 1, c = new THREE.Color().setHSL(h, .65, .55 + Math.sin(t*3.1)*.06);
+      tvScreen.material.color.copy(c); tvLight.color.copy(c); tvLight.intensity = 1.6 + Math.sin(t*4.3)*.35;
+      tvGlow.material.color.copy(c); tvGlow.material.opacity = .5 + Math.sin(t*4.3)*.12;
+      tvGlow.userData.back.material.color.copy(c).multiplyScalar(.75);
+    }
+  }
   function loop(){
-    raf = 0; if(!needs) return; needs = false;
+    raf = 0;
+    const moving = needs, a = animating();
+    if(!moving && !a) return;
+    needs = false;
+    if(a) step(); else clock.getDelta();
     camera.position.set(target.x + dist*Math.sin(pol)*Math.sin(az), target.y + dist*Math.cos(pol), target.z + dist*Math.sin(pol)*Math.cos(az));
     camera.lookAt(target);
     renderer.render(scene, camera);
-    placeLabels();
+    if(moving) placeLabels();
+    if(a) raf = requestAnimationFrame(loop);
   }
   function placeLabels(){
     const W = el.clientWidth, H = el.clientHeight, PAD = 8, TOP = 52;
@@ -171,6 +227,11 @@
       }
     }
     coffee.material.emissive.set(state.coffee ? 0xff8a3c : 0x000000); coffee.material.emissiveIntensity = .7;
+    anim = {washer:!!state.washer, coffee:!!state.coffee, tv:!!state.tv};
+    for(const p of steam) p.visible = anim.coffee;
+    if(!anim.washer) washer.position.x = washerX;
+    drumGlass.material.emissive.set(anim.washer ? 0x3d6fd6 : 0x000000); drumGlass.material.emissiveIntensity = .35;
+    if(!anim.tv){ tvScreen.material.color.set(0x0b0d12); tvLight.intensity = 0; tvGlow.material.opacity = 0; tvGlow.userData.back.material.color.set(0x15171d) }
     for(const lab of labelsEl.children){
       const st = state.rooms[lab.dataset.room] || {};
       lab.textContent = st.label || '';
