@@ -2,15 +2,20 @@
    Pokoje: salon z aneksem (1), sypialnia (2), łazienka (3), przedpokój (4).
    Ściany przycięte na ~1 m (widok „domek dla lalek”), światła w pokojach reagują na stan urządzeń. */
 (function(){
-  const S = 0.01;            // px → metry
+  const S = 0.0084;          // px → metry (skala wyliczona z powierzchni pokoi w protokole: łazienka 4,16 m², pokój 12,10 m²)
   const CX = 567, CY = 508;  // środek rzutu
-  const WALL_H = 1.05;
+  const WALL_H = 1.05;       // ściany od strony kamery — ucięte
+  const TALL_H = 2.45;       // ściany z tyłu kadru — pełna wysokość (widać szafki górne, płytki, lustro)
+  const WALL_C = '#d6d6d3';  // NCS S 1500-N jasny szary
   const P = (x, y) => [(x - CX) * S, (y - CY) * S];
 
-  const WALLS = [
-    [80,128,1055,155],[80,128,125,255],[80,460,125,600],[80,765,125,888],[80,840,1055,888],
-    [1030,128,1055,520],[1030,635,1055,888],
-  ];
+  // ściany zewnętrzne pogrupowane wg strony (do przekroju zależnego od kamery)
+  const SIDES = {
+    north:{n:[0,-1], walls:[[80,128,1055,155]]},
+    south:{n:[0, 1], walls:[[80,840,1055,888]]},
+    west: {n:[-1,0], walls:[[80,128,125,255],[80,460,125,600],[80,765,125,888]]},
+    east: {n:[ 1,0], walls:[[1030,128,1055,520],[1030,635,1055,888]]},
+  };
   const INNER = [   // ściany działowe — niższe, żeby było widać, co dzieje się w pokojach
     [125,515,715,527],[665,645,685,840],[665,645,795,660],[890,645,1030,660],
     [835,420,1030,432],[835,420,847,500],
@@ -23,7 +28,7 @@
     lazienka:  {rects:[[685,660,1030,840]],                   color:'#e3e6ea', light:[860,750]},
     przedpokoj:{rects:[[715,420,1030,645]],                   color:'#dcdad6', light:[800,575]},
   };
-  const DEVICE_SPOTS = { coffee:[892,175,.9] };   // ekspres na blacie
+  const DEVICE_SPOTS = { coffee:[928,166,.9] };   // ekspres na narożnym blacie
   // odkurzacz: stacja w przedpokoju, strefy sprzątania i przejazd przez drzwi
   const VAC_DOCK = [970,606];
   const VAC_ZONES = {
@@ -37,9 +42,10 @@
   let renderer, scene, camera, el, labelsEl, floors = {}, lights = {}, bulbs = {}, coffee, sel = null;
   let robot, brush, robotLed, vac = null, washer, washerX = 0, drum, drumGlass, steam = [], tvScreen, tvLight, tvGlow, anim = {washer:false, coffee:false, tv:false};
   const clock = new THREE.Clock();
-  let az = -0.5, pol = 0.86, dist = 18.5, needs = true, raf = 0;
+  let az = -0.5, pol = 0.86, dist = 15.5, needs = true, raf = 0;
+  const side = {};   // grupy elementów powyżej 1,05 m dla każdej ściany zewnętrznej
   let goal = null, focused = undefined;   // płynny najazd kamery na wybrany pokój
-  const DIST_ALL = 18.5, DIST_ROOM = 9.5;
+  const DIST_ALL = 15.5, DIST_ROOM = 8;
   const target = new THREE.Vector3(0, 0, 0.25);
 
   function box(x1,y1,x2,y2,h,color,y0=0,opts={}){
@@ -63,21 +69,21 @@
     return TEX[key] = t;
   }
   const rnd = (a,b) => a + Math.random()*(b-a);
-  const oakTex = () => canvasTex('oak', 512, 512, (g,w,h) => {        // jasny dąb, deski
+  const oakTex = () => canvasTex('ash', 512, 512, (g,w,h) => {        // Egger Classic Aqua Jesion Avio naturalny, deski 129,2×19,3 cm
     const rows = 8, rh = h/rows;
     for(let r=0; r<rows; r++){
       const off = (r*157) % (w/2);
       for(let x=-off; x<w; x+=w/2){
-        g.fillStyle = `hsl(${rnd(30,36)},${rnd(40,50)}%,${rnd(70,76)}%)`; g.fillRect(x, r*rh, w/2, rh);
-        for(let i=0;i<16;i++){ const yy = r*rh + rnd(2,rh-2); g.strokeStyle = `rgba(130,85,40,${rnd(.04,.1)})`; g.lineWidth = rnd(.6,1.4);
+        g.fillStyle = `hsl(${rnd(33,38)},${rnd(26,34)}%,${rnd(74,79)}%)`; g.fillRect(x, r*rh, w/2, rh);
+        for(let i=0;i<16;i++){ const yy = r*rh + rnd(2,rh-2); g.strokeStyle = `rgba(120,95,65,${rnd(.04,.1)})`; g.lineWidth = rnd(.6,1.4);
           g.beginPath(); g.moveTo(x,yy); g.bezierCurveTo(x+w*.15,yy+rnd(-3,3),x+w*.35,yy+rnd(-3,3),x+w/2,yy+rnd(-1,1)); g.stroke() }
-        g.fillStyle = 'rgba(95,62,30,.28)'; g.fillRect(x, r*rh, 2, rh);
+        g.fillStyle = 'rgba(95,75,50,.25)'; g.fillRect(x, r*rh, 2, rh);
       }
-      g.fillStyle = 'rgba(95,62,30,.25)'; g.fillRect(0, r*rh, w, 2);
+      g.fillStyle = 'rgba(95,75,50,.22)'; g.fillRect(0, r*rh, w, 2);
     }
   });
   const walnutTex = () => canvasTex('walnut', 256, 512, (g,w,h) => {   // fronty kuchni i łazienki
-    g.fillStyle = '#a4673a'; g.fillRect(0,0,w,h);
+    g.fillStyle = '#9b6b43'; g.fillRect(0,0,w,h);   // Egger H1386 ST40 Dąb Casella brązowy
     for(let i=0;i<70;i++){ const x = rnd(0,w); g.strokeStyle = `rgba(${rnd(60,110)|0},${rnd(30,55)|0},15,${rnd(.08,.22)})`; g.lineWidth = rnd(.6,2.4);
       g.beginPath(); g.moveTo(x,0); g.bezierCurveTo(x+rnd(-12,12),h*.33,x+rnd(-12,12),h*.66,x+rnd(-6,6),h); g.stroke() }
   });
@@ -88,6 +94,25 @@
   const concreteTex = () => canvasTex('concrete', 256, 256, (g,w,h) => {
     g.fillStyle = '#bdb8b0'; g.fillRect(0,0,w,h);
     for(let i=0;i<2600;i++){ const v = rnd(150,215)|0; g.fillStyle = `rgba(${v},${v-2},${v-6},.5)`; g.fillRect(rnd(0,w),rnd(0,h),rnd(1,3),rnd(1,3)) }
+  });
+  const largeTile = (key, base, veins) => canvasTex(key, 256, 512, (g,w,h) => {   // płytka 60×120 z fugą
+    g.fillStyle = base; g.fillRect(0,0,w,h);
+    for(let i=0;i<veins;i++){ g.strokeStyle = `rgba(150,140,125,${rnd(.06,.14)})`; g.lineWidth = rnd(.5,1.2); g.beginPath(); let x = rnd(0,w), y = 0; g.moveTo(x,y);
+      while(y < h){ x += rnd(-14,14); y += rnd(14,34); g.lineTo(x,y) } g.stroke() }
+    g.strokeStyle = 'rgba(150,150,150,.6)'; g.lineWidth = 2; g.strokeRect(0,0,w,h);
+  });
+  const munichTex = () => largeTile('munich', '#efefed', 2);   // Cifre Munich White mat — podłoga łazienki
+  const acronTex  = () => largeTile('acron',  '#e8e1d2', 3);   // Cifre Acron Ivory mat — korytarz
+  const veniceTex = () => largeTile('venice', '#ebe5d9', 6);   // Ceramica Limone Venice Ivory mat — ściany łazienki
+  const brickTex = () => canvasTex('brick', 256, 256, (g,w,h) => {   // Paradyż Monpelli White Mix cegiełka 29,8×6,5 połysk
+    g.fillStyle = '#c9c7c2'; g.fillRect(0,0,w,h);
+    const bw = w/2, bh = h/9;
+    for(let r=0; r<9; r++) for(let c=-1; c<3; c++){ const x = c*bw + (r%2 ? bw/2 : 0) + 1.5, y = r*bh + 1.5;
+      g.fillStyle = `hsl(40,${rnd(5,12)}%,${rnd(93,98)}%)`; g.fillRect(x, y, bw-3, bh-3) }
+  });
+  const graniteTex = () => canvasTex('granite', 256, 256, (g,w,h) => {   // Egger F486 Granit lśniący biały
+    g.fillStyle = '#f5f4f1'; g.fillRect(0,0,w,h);
+    for(let i=0;i<1800;i++){ const v = rnd(150,230)|0; g.fillStyle = `rgba(${v},${v},${v-4},.6)`; g.fillRect(rnd(0,w),rnd(0,h),rnd(.6,2),rnd(.6,2)) }
   });
   const tileTex = () => canvasTex('tile', 256, 256, (g,w,h) => {       // jasne płytki łazienkowe z żyłkami
     g.fillStyle = '#ecebe8'; g.fillRect(0,0,w,h);
@@ -117,6 +142,8 @@
     g.center(); return g;
   }
   function put(mesh, xpx, ypx, y){ const [x,z] = P(xpx,ypx); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); return mesh }
+  // elementy powyżej 1,05 m przy danej ścianie trafiają do jej grupy (chowanej, gdy ściana jest od strony kamery)
+  function toSide(name, mesh){ scene.remove(mesh); side[name].add(mesh); return mesh }
   const bx = (x1,y1,x2,y2,h,y0,m) => put(new THREE.Mesh(new THREE.BoxGeometry((x2-x1)*S, h, (y2-y1)*S), m), (x1+x2)/2, (y1+y2)/2, y0 + h/2);
   const rb = (x1,y1,x2,y2,h,y0,r,m) => put(new THREE.Mesh(rboxGeo((x2-x1)*S, h, (y2-y1)*S, r), m), (x1+x2)/2, (y1+y2)/2, y0 + h/2);
   let lampShade, lampLight, counterLed;
@@ -133,13 +160,14 @@
     rb(245,466,415,504,.42,0,.02,WALNUT());                                   // szafka RTV
 
     /* ── JADALNIA: okrągły stół (beton + biała noga) i 4 krzesła ── */
-    const [tcx,tcy] = [598,430];
-    const top = new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,.035,56), mat('concrete',{color:0xffffff, roughness:.9, map:concreteTex()}));
+    const [tcx,tcy] = [598,436];
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.035,56), mat('concrete',{color:0xffffff, roughness:.9, map:concreteTex()}));
     put(top, tcx, tcy, .757);
     put(new THREE.Mesh(new THREE.CylinderGeometry(.19,.36,.74,48), mat('cone',{color:0xf3f1ec, roughness:.6})), tcx, tcy, .37);
     const CH_WOOD = mat('chairwood',{color:0x5a3a26, roughness:.55});
     const CH_FAB = mat('chairfab',{color:0xd6d2cb, roughness:.95, map:boucleTex()});
-    for(const [dx,dy] of [[-53,-53],[53,-53],[-53,53],[53,53]]){
+    for(const a of [-150,-30,30,150].map(d=>d*Math.PI/180)){
+      const dx = Math.cos(a)*.74/S, dy = Math.sin(a)*.74/S;
       const g = new THREE.Group();
       const add = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x,y,z); o.castShadow = true; g.add(o); return o };
       for(const sx of [-.23,.23]){
@@ -156,41 +184,68 @@
       scene.add(g);
     }
 
-    /* ── KUCHNIA: drewniane szafki, biały blat, czarna płyta, zlew i piekarnik ── */
+    /* ── KUCHNIA (protokół): fronty dolne Dąb Casella, górne Szary Taupe, blat Granit lśniący biały,
+          płytki Monpelli cegiełka, zlew Franke Orion czarny, Bosch: płyta i piekarnik czarne, okap srebrny, lodówka w zabudowie ── */
+    const TAUPE = mat('taupe',{color:0xb9afa3, roughness:.5});              // Egger U750 Szary Taupe
+    const GRANITE = mat('granite',{color:0xffffff, roughness:.3, map:graniteTex()});
+    const BRICK = mat('brick',{color:0xffffff, roughness:.15, map:brickTex()});
+    const rail = (x,y,h,vertical) => vertical ? bx(x-1.5,y-9,x+1.5,y+9,.012,h,METAL()) : bx(x-9,y-1.5,x+9,y+1.5,.012,h,METAL());  // reling 128 mm
     bx(668,163,958,219,.08,0,mat('plinth',{color:0x3a2a1e, roughness:.8}));
-    for(const [x1,x2] of [[665,725],[725,800],[800,880],[880,960]]) bx(x1+1,160,x2-1,222,.78,.08,WALNUT());
-    for(const y of [.3,.52,.74]) bx(680,222,710,225,.015,y,METAL());           // uchwyty szuflad
-    for(const [x1,x2] of [[800,880],[880,960]]) bx(x1+12,222,x2-12,225,.015,.8,METAL());
-    bx(728,221,797,224,.58,.16,BLACK()); bx(736,224,789,227,.018,.68,METAL()); // piekarnik
-    bx(663,157,962,227,.04,.86,mat('counter',{color:0xf7f6f3, roughness:.35}));   // blat
-    bx(690,166,780,213,.006,.9,BLACK());                                       // płyta indukcyjna
-    for(const [hx,hy,r] of [[708,180,.09],[708,200,.07],[760,180,.07],[760,200,.09]]){
-      const ring = new THREE.Mesh(new THREE.RingGeometry(r*.7,r,32), mat('hobring',{color:0x3c4048, roughness:.3}));
+    for(const [x1,x2] of [[665,725],[725,796],[796,850],[850,921],[921,960]]) bx(x1+1,160,x2-1,222,.78,.08,WALNUT());
+    for(const y of [.32,.55,.78]) bx(686,222,704,225,.012,y,METAL());       // szuflady
+    rail(823,223.5,.78); rail(885,223.5,.78); rail(940,223.5,.78);            // zmywarka 45 cm, zlewozmywak, narożna
+    bx(727,221,794,224,.58,.16,BLACK()); bx(735,224,786,227,.018,.68,METAL()); // piekarnik Bosch Serie 4 czarny
+    bx(663,157,962,228,.038,.862,GRANITE);                                   // blat 38 mm
+    bx(727,163,794,220,.006,.9,BLACK());                                     // płyta indukcyjna 60×60 czarna
+    for(const [hx,hy,r] of [[745,178,.085],[745,205,.065],[776,178,.065],[776,205,.085]]){
+      const ring = new THREE.Mesh(new THREE.RingGeometry(r*.72,r,32), mat('hobring',{color:0x3c4048, roughness:.3}));
       ring.rotation.x = -Math.PI/2; put(ring, hx, hy, .907);
     }
-    bx(805,168,860,210,.01,.897,mat('sink',{color:0x202227, roughness:.4}));    // czarny zlew
-    put(new THREE.Mesh(new THREE.CylinderGeometry(.012,.015,.3,12), METAL()), 832, 162, 1.05);
-    bx(828,160,836,180,.02,1.19,METAL());                                      // wylewka baterii
-    counterLed = bx(668,158,958,161,.012,.888,new THREE.MeshBasicMaterial({color:0x9a8f80}));   // listwa LED pod szafkami
-    for(const [y1,y2] of [[227,283],[283,340]]) bx(962,y1+1,1028,y2-1,.78,.08,WALNUT());
-    bx(958,262,961,278,.015,.8,METAL()); bx(958,300,961,320,.015,.8,METAL());
-    bx(960,224,1030,342,.04,.86,mat('counter'));
-    bx(962,342,1028,415,.97,.08,WALNUT());                                     // wysoka zabudowa (lodówka)
-    bx(958,355,961,400,.02,.55,METAL());
-    bx(665,155,960,158,.14,.9,mat('backsplash',{color:0xf2f1ee, roughness:.3})); // płytki nad blatem
+    const SINK = mat('sink',{color:0x1d1e21, roughness:.45});               // Franke Orion OID 611-62 Onyx Tectonite
+    bx(852,166,886,214,.012,.892,SINK); bx(886,166,919,214,.006,.9,SINK);
+    for(let x=890; x<917; x+=5) bx(x,170,x+1.5,210,.002,.906,mat('groove',{color:0x2b2c30}));
+    put(new THREE.Mesh(new THREE.CylinderGeometry(.012,.016,.32,12), METAL()), 869, 162, 1.06);   // Ideal Standard Ceralook
+    bx(865,160,873,182,.022,1.21,METAL());
+    counterLed = bx(668,196,958,199,.01,1.42,new THREE.MeshBasicMaterial({color:0x9a8f80}));   // LED pod szafkami górnymi
+    toSide('north', counterLed);
+    bx(665,155,960,158,.15,.9,BRICK);                                         // płytki nad blatem (do 1,05)
+    toSide('north', bx(665,155,960,158,.4,1.05,BRICK));
+    for(const [x1,x2] of [[665,725],[725,796],[796,850],[850,921],[921,960]]){   // szafki górne Szary Taupe
+      toSide('north', bx(x1+1,155,x2-1,197,.72,1.45,TAUPE));
+      const knob = put(new THREE.Mesh(new THREE.SphereGeometry(.014,10,8), METAL()), x2-8, 198, 1.5); toSide('north', knob);   // gałka HVYT Loft
+    }
+    toSide('north', bx(726,158,795,197,.035,1.41,mat('hood',{color:0xc4c7cc, roughness:.3, metalness:.7})));   // okap Bosch srebrny
+    for(const [y1,y2] of [[228,284],[284,342]]) bx(962,y1+1,1028,y2-1,.78,.08,WALNUT());
+    rail(959.5,256,.78,true); rail(959.5,313,.78,true);
+    bx(960,226,1030,343,.038,.862,GRANITE);
+    bx(1027,228,1030,342,.15,.9,BRICK); toSide('east', bx(1027,228,1030,342,.4,1.05,BRICK));
+    for(const [y1,y2] of [[228,285],[285,342]]){ toSide('east', bx(988,y1+1,1030,y2-1,.72,1.45,TAUPE));
+      toSide('east', put(new THREE.Mesh(new THREE.SphereGeometry(.014,10,8), METAL()), 986, y2-8, 1.5)) }
+    bx(962,343,1028,415,.97,.08,WALNUT());                                    // zabudowa lodówki Bosch KIN86NSE0
+    toSide('east', bx(962,343,1028,415,1.12,1.05,WALNUT()));
+    rail(959.5,380,.6,true); rail(959.5,380,1.3,true);
 
     /* ── ŁAZIENKA: wanna z parawanem, podwieszane WC, szafka z umywalką ── */
-    bx(686,661,765,838,.55,0,mat('tub',{color:0xfbfbfb, roughness:.15}));
-    bx(694,670,757,830,.02,.54,mat('tubin',{color:0xe4ebf0, roughness:.1}));
-    bx(764,662,767,762,.48,.56,GLASS()); bx(764,662,767,762,.015,1.03,METAL());
-    bx(886,826,992,840,.95,0,mat('install',{color:0xf2f1ee, roughness:.4, map:tileTex()}));   // zabudowa WC
-    bx(926,823,950,826,.1,.72,mat('flush',{color:0xc9cacc, roughness:.3, metalness:.4}));
-    rb(898,772,932,826,.17,.27,.06,W()); rb(899,770,931,822,.03,.44,.015,W()); // miska WC
-    bx(778,802,858,838,.3,.48,WALNUT());                                       // szafka podumywalkowa
-    bx(800,800,836,803,.012,.6,METAL());
-    bx(776,800,860,838,.03,.78,mat('counter'));
-    rb(792,805,846,835,.1,.81,.04,W());                                        // umywalka nablatowa
-    put(new THREE.Mesh(new THREE.CylinderGeometry(.01,.013,.2,10), METAL()), 820, 836, .92);
+    const VENICE = mat('venice',{color:0xffffff, roughness:.6, map:veniceTex()});
+    // płytki Venice Ivory na ścianach łazienki (od środka)
+    bx(685,660,1030,663,.62,0,VENICE); bx(685,660,688,840,.62,0,VENICE);
+    bx(685,837,1030,840,1.05,0,VENICE); toSide('south', bx(685,837,1030,840,1.4,1.05,VENICE));
+    bx(1027,660,1030,840,1.05,0,VENICE); toSide('east', bx(1027,660,1030,840,1.4,1.05,VENICE));
+    bx(686,661,769,838,.55,0,mat('tub',{color:0xfbfbfb, roughness:.15}));     // wanna Roca Linea 150×70
+    bx(694,670,761,830,.02,.54,mat('tubin',{color:0xe4ebf0, roughness:.1}));
+    bx(768,662,771,800,1.4,.56,GLASS()); bx(768,662,771,800,.015,1.96,METAL()); // parawan Roca Capital 115×140 chrom
+    put(new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.12,10), METAL()), 728, 836, .7);   // bateria Roca Targa
+    bx(886,826,992,840,1.12,0,mat('install',{color:0xffffff, roughness:.6, map:veniceTex()}));   // stelaż TECE 112 cm w zabudowie
+    bx(926,823,950,826,.1,.92,mat('flush',{color:0xe9ebee, roughness:.12, metalness:.9}));      // przycisk TECE Now chrom
+    rb(898,772,932,826,.17,.27,.06,W()); rb(899,770,931,822,.03,.44,.015,W()); // Roca Rimless Compacto, deska wolnoopadająca
+    bx(778,802,858,838,.3,.48,WALNUT());                                       // szafka podumywalkowa na wymiar
+    bx(808,800,828,803,.012,.6,METAL());
+    rb(788,788,848,838,.13,.78,.03,W());                                       // umywalka Roca Debba 50×42
+    bx(796,794,840,830,.01,.905,mat('basin',{color:0xe9eef2, roughness:.1}));
+    put(new THREE.Mesh(new THREE.CylinderGeometry(.01,.013,.18,10), METAL()), 818, 834, .99);   // bateria Roca Targa
+    const mirror = new THREE.Mesh(new THREE.CircleGeometry(.25,40), mat('mirror',{color:0xdfe7ee, roughness:.02, metalness:.95}));
+    mirror.scale.set(1,2,1); mirror.rotation.y = Math.PI; put(mirror, 818, 836, 1.55); toSide('south', mirror);   // lustro owalne 50×100
+    toSide('south', put(new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.16,12), METAL()), 818, 834, 2.12));     // kinkiet Cezanne chrom
     bx(938,660,1022,740,.13,.92,WALNUT());                                     // szafka nad pralką
 
     /* ── SYPIALNIA: łóżko bouclé, stoliki, lampka, biurko, komoda z TV, monstera ── */
@@ -227,6 +282,10 @@
     bx(550,645,665,835,.95,0,mat('wardrobe',{color:0xefebe5, roughness:.6}));   // szafa
     bx(546,700,549,780,.015,.6,METAL());
 
+    const CURTAIN = mat('curtain',{color:0xd9ccb6, roughness:1, side:THREE.DoubleSide});
+    for(const [y1,y2] of [[592,612],[752,772]]){ bx(127,y1,133,y2,.95,.1,CURTAIN); toSide('west', bx(127,y1,133,y2,1.3,1.05,CURTAIN)) }
+    toSide('west', bx(128,612,131,752,1.25,1.05,mat('sheer',{color:0xffffff, roughness:1, transparent:true, opacity:.45})));
+
     /* ── PRZEDPOKÓJ ── */
     bx(847,432,1030,500,.95,0,mat('wardrobe'));
   }
@@ -253,10 +312,10 @@
     box(60,108,1075,908,.08,'#cfd6e3',-.08);
     for(const [k,r] of Object.entries(ROOMS)){
       floors[k] = r.rects.map(([a,b,c,d]) => {
-        const base = k === 'lazienka' ? tileTex() : oakTex(), t = base.clone(); t.needsUpdate = true;
-        const tile = k === 'lazienka' ? .6 : 2.4;
-        t.repeat.set((c-a)*S/tile, (d-b)*S/tile);
-        const m = box(a,b,c,d,.02,'#ffffff',0,{map:t, roughness:k==='lazienka'?.35:.75});
+        const base = k === 'lazienka' ? munichTex() : k === 'przedpokoj' ? acronTex() : oakTex(), t = base.clone(); t.needsUpdate = true;
+        if(k === 'lazienka' || k === 'przedpokoj') t.repeat.set((c-a)*S/.6, (d-b)*S/1.2);       // płytki 60×120
+        else t.repeat.set((c-a)*S/2.584, (d-b)*S/1.544);                                       // 2 deski × 8 rzędów
+        const m = box(a,b,c,d,.02,'#ffffff',0,{map:t, roughness:k==='lazienka'||k==='przedpokoj'?.45:.75});
         m.castShadow = false; m.userData.room = k; return m;
       });
       const [lx,lz] = P(...r.light);
@@ -269,13 +328,22 @@
       lab.onclick = (e) => { e.stopPropagation(); onRoom && onRoom(k) };
       labelsEl.appendChild(lab);
     }
-    for(const w of WALLS) box(...w, WALL_H, '#fbfbfd');
-    for(const w of INNER) box(...w, INNER_H, '#f4f5f8');
-    for(const w of WINDOWS){
-      box(...w, .25, '#fbfbfd');
-      const g = box(w[0]+14,w[1],w[2]-14,w[3], WALL_H-.25, '#a9c6ee', .25, {transparent:true, opacity:.35, roughness:.1});
-      g.castShadow = false;
+    for(const [name, sd] of Object.entries(SIDES)){
+      side[name] = new THREE.Group(); scene.add(side[name]);
+      for(const w of sd.walls){ box(...w, WALL_H, WALL_C); toSide(name, box(...w, TALL_H-WALL_H, WALL_C, WALL_H)) }
     }
+    for(const w of INNER) box(...w, INNER_H, WALL_C);
+    const glass = {transparent:true, opacity:.3, roughness:.05, color:'#a9c6ee'};
+    // O12 drzwi balkonowe (od podłogi), O3 okno (parapet 85 cm)
+    for(const [w, sill] of [[WINDOWS[0], 0], [WINDOWS[1], .85]]){
+      if(sill) box(...w, sill, WALL_C);
+      const lo = box(w[0]+14,w[1],w[2]-14,w[3], WALL_H-sill, '#a9c6ee', sill, glass); lo.castShadow = false;
+      const hi = box(w[0]+14,w[1],w[2]-14,w[3], 2.25-WALL_H, '#a9c6ee', WALL_H, glass); hi.castShadow = false; toSide('west', hi);
+      toSide('west', box(...w, TALL_H-2.25, WALL_C, 2.25));
+    }
+    // drzwi wejściowe
+    box(1036,522,1044,633,WALL_H,'#8f8b85'); toSide('east', box(1036,522,1044,633,2.05-WALL_H,'#8f8b85',WALL_H));
+    toSide('east', box(1030,520,1055,635,TALL_H-2.05,WALL_C,2.05));
     buildFurniture();
     const [cx1,cy1,ch] = DEVICE_SPOTS.coffee;   // blat na wysokości .9
     coffee = box(cx1,cy1,cx1+26,cy1+28,.32,'#2a2d38',ch,{emissive:0x000000});
@@ -377,7 +445,7 @@
     if(R){ const xs = R.rects.flatMap(r=>[r[0],r[2]]), ys = R.rects.flatMap(r=>[r[1],r[3]]);
       [tx,tz] = P((Math.min(...xs)+Math.max(...xs))/2, (Math.min(...ys)+Math.max(...ys))/2);
       const span = Math.max(Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys))*S;
-      d = Math.max(7.5, Math.min(DIST_ROOM + 2, span*1.6 + 3.2)); p = .5 }   // pokój: widok bardziej z góry, żeby ściany nie zasłaniały
+      d = Math.max(6.5, Math.min(DIST_ROOM + 2, span*1.6 + 3.2)); p = .5 }   // pokój: widok bardziej z góry, żeby ściany nie zasłaniały
     goal = {x:tx, z:tz, d, p};
   }
   function stepCamera(dt){
@@ -439,6 +507,10 @@
       tvGlow.userData.back.material.color.copy(c).multiplyScalar(.75);
     }
   }
+  function updateCutaway(){
+    const cx = Math.sin(az), cz = Math.cos(az);
+    for(const [name, sd] of Object.entries(SIDES)) side[name].visible = (cx*sd.n[0] + cz*sd.n[1]) < .25;
+  }
   function loop(){
     raf = 0;
     const moving = needs, a = animating();
@@ -447,6 +519,7 @@
     if(a) step(); else clock.getDelta();
     camera.position.set(target.x + dist*Math.sin(pol)*Math.sin(az), target.y + dist*Math.cos(pol), target.z + dist*Math.sin(pol)*Math.cos(az));
     camera.lookAt(target);
+    if(moving) updateCutaway();
     renderer.render(scene, camera);
     if(moving) placeLabels();
     if(a) raf = requestAnimationFrame(loop);
