@@ -40,18 +40,21 @@ function page(body, status = 200, headers = {}) {
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="robots" content="noindex">
 <title>Nasze mieszkanie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{color-scheme:light;--bg:#f3f3f0;--s1:#fff;--t1:#141414;--t2:#5d5d58;--bord:#e3e2dd;--acc:#141414;--acc-t:#fff;--err:#d42626}
-@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0d0d0d;--s1:#171717;--t1:#f2f2f2;--t2:#a3a3a3;--bord:#252525;--acc:#f2f2f2;--acc-t:#111;--err:#f87171}}
-body{min-height:100vh;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px;-webkit-font-smoothing:antialiased}
+:root{color-scheme:light;--bg:#EEF1F6;--s1:#fff;--t1:#0E1F45;--t2:#6B7894;--bord:rgba(14,31,69,.08);--acc:#0E1F45;--acc-t:#fff;--err:#E5484D}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#080F21;--s1:#111B33;--t1:#EEF2FA;--t2:#8E9BB8;--bord:rgba(255,255,255,.07);--acc:#DCE6F8;--acc-t:#0E1F45;--err:#FF6B6F}}
+body{min-height:100vh;background:var(--bg);color:var(--t1);font-family:'Outfit',system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px;-webkit-font-smoothing:antialiased}
 .box{width:100%;max-width:360px}
-.ic{width:72px;height:72px;border-radius:18px;display:block;margin-bottom:22px}
-h1{font-size:28px;font-weight:800;letter-spacing:-.6px;margin-bottom:22px}
+.ic{width:72px;height:72px;border-radius:22px;display:block;margin-bottom:24px}
+h1{font-size:30px;font-weight:600;letter-spacing:-.5px;margin-bottom:24px}
 p{font-size:15px;color:var(--t2);margin:6px 0 24px;line-height:1.45}
-input{width:100%;height:52px;border-radius:14px;border:1px solid var(--bord);background:var(--s1);color:var(--t1);padding:0 16px;font-size:17px;outline:none;-webkit-appearance:none;font-family:inherit}
-input:focus{border-color:var(--t1)}
-button{width:100%;height:52px;border-radius:14px;border:0;background:var(--acc);color:var(--acc-t);font-size:16px;font-weight:700;margin-top:10px;cursor:pointer;font-family:inherit}
+input{width:100%;height:56px;border-radius:28px;border:1.5px solid transparent;background:var(--s1);color:var(--t1);padding:0 22px;font-size:17px;box-shadow:0 10px 30px -18px rgba(14,31,69,.35);outline:none;-webkit-appearance:none;font-family:inherit}
+input:focus{border-color:var(--acc)}
+button{width:100%;height:56px;border-radius:28px;border:0;background:var(--acc);color:var(--acc-t);font-size:17px;font-weight:500;margin-top:10px;cursor:pointer;font-family:inherit}
 .err{color:var(--err);font-size:14px;font-weight:600;margin-top:12px}
 code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bord);padding:2px 6px;border-radius:6px;color:var(--t1)}
 </style></head><body><div class="box">
