@@ -48,12 +48,17 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 /* pasek górny: materiał z rozmyciem, przyklejony */
 .top{position:sticky;top:0;z-index:30;display:flex;gap:8px;align-items:center;margin:0 -16px;padding:calc(10px + var(--safe-t)) 16px 10px;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid transparent;transition:border-color .2s}
 .top.scrolled{border-bottom-color:var(--bord)}
-.views{flex:1;display:flex;gap:6px;min-width:0}
-.vw{flex:1;min-width:0;height:38px;border-radius:19px;background:var(--s3);font-size:15px;font-weight:600;color:var(--t1);display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;transition:background .25s var(--e-out),color .25s var(--e-out),transform .2s var(--e-out)}
+.views{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;min-width:0}
+.vw{position:relative;min-width:0;height:56px;border-radius:16px;background:var(--s3);font-size:11px;font-weight:600;color:var(--t1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;white-space:nowrap;transition:background .25s var(--e-out),color .25s var(--e-out),transform .2s var(--e-out)}
 .vw svg{flex-shrink:0}
-.vw:active{transform:scale(.96)}
+.vw span{max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+.vw:active{transform:scale(.95)}
 .vw.on{background:var(--acc);color:var(--acc-t)}
-.vw b{font-size:13px;font-weight:600;opacity:.5;font-family:var(--rounded)}
+.vw b{position:absolute;top:5px;right:6px;font-size:10px;font-weight:700;font-family:var(--rounded);line-height:16px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:color-mix(in srgb,currentColor 16%,transparent)}
+.vw b:empty{display:none}
+.top .ib.set{width:44px;height:56px;border-radius:16px}
+.search-row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.search-row .search{flex:1;margin:0}
 .ib{width:38px;height:38px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--t1);font-size:14px;flex-shrink:0;transition:transform .2s var(--e-out),opacity .2s}
 .ib:active{transform:scale(.9);opacity:.7}
 .ib.spin svg{animation:spin .9s linear infinite}
@@ -238,6 +243,22 @@ textarea.in{height:auto;min-height:80px;padding:12px 16px;resize:vertical}
 .in-suf .in{padding-right:44px}
 .in-suf span{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--t2);pointer-events:none;font-size:17px}
 
+/* lista zakupów + zadania */
+.card.g{padding:11px 14px}
+.card.g h3{font-size:17px;font-weight:500}
+.qty{flex-shrink:0;font-size:15px;color:var(--t2);font-family:var(--rounded);font-weight:600}
+.g-emo{font-size:19px;line-height:1}
+.grp-act{margin-left:auto;font-size:15px;font-weight:400;color:var(--link)}
+.card.tk{align-items:flex-start}
+.card.tk .chk{margin-top:1px}
+.card.tk p{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.due{flex-shrink:0;font-size:13px;font-weight:600;margin-top:3px;white-space:nowrap}
+.chip span{font-size:15px;line-height:1}
+.dt-row{display:flex;gap:8px}
+.dt-row .in{flex:1;min-width:0}
+.dt-row .in[type=time]{flex:0 0 120px}
+.chips.quick{margin-top:8px}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -246,19 +267,22 @@ textarea.in{height:auto;min-height:80px;padding:12px 16px;resize:vertical}
 <div class="app">
   <div class="top" id="top">
   <nav class="views" id="views">
-    <button class="vw on" data-view="parcels"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>Przesyłki<b id="vc-parcels"></b></button>
-    <button class="vw" data-view="shop"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>Do kupienia<b id="vc-shop"></b></button>
+    <button class="vw on" data-view="parcels"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><span>Przesyłki</span><b id="vc-parcels"></b></button>
+    <button class="vw" data-view="shop"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg><span>Do kupienia</span><b id="vc-shop"></b></button>
+    <button class="vw" data-view="groc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg><span>Zakupy</span><b id="vc-groc"></b></button>
+    <button class="vw" data-view="tasks"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg><span>Zadania</span><b id="vc-tasks"></b></button>
   </nav>
-
-      <button class="ib" id="refreshAll" aria-label="Odśwież wszystkie"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
-      <button class="ib" onclick="openSettings()" aria-label="Ustawienia"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <button class="ib set" onclick="openSettings()" aria-label="Ustawienia"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 
   <section class="bento" id="bento"></section>
 
+  <div class="search-row">
   <div class="search">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     <input id="q" type="search" placeholder="Szukaj po nazwie lub numerze" autocomplete="off">
+  </div>
+  <button class="ib" id="refreshAll" aria-label="Odśwież wszystkie"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
 
   <div class="tabs" id="tabs"></div>
@@ -267,6 +291,36 @@ textarea.in{height:auto;min-height:80px;padding:12px 16px;resize:vertical}
 </div>
 
 <button class="fab" onclick="openAddCurrent()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span id="fabTxt">Dodaj przesyłkę</span></button>
+
+<!-- LISTA ZAKUPÓW -->
+<div class="sw" id="grocSheet"><div class="sw-bg" onclick="closeSheet('grocSheet')"></div>
+  <div class="sh">
+    <div class="grab"></div>
+    <div class="sh-h"><h2 id="gTitle">Dodaj produkt</h2><button class="ib" onclick="closeSheet('grocSheet')" aria-label="Zamknij">✕</button></div>
+    <div class="fg"><label class="fl" for="gName">Produkt</label><input class="in" id="gName" placeholder="np. pomidory" autocomplete="off" oninput="onGName()" onkeydown="if(event.key==='Enter'){event.preventDefault();saveGroc(!gEdit)}"></div>
+    <div class="fg"><label class="fl" for="gQty">Ilość (opcjonalnie)</label><input class="in" id="gQty" placeholder="np. 1 kg, 6 szt." autocomplete="off"></div>
+    <div class="fg"><label class="fl">Kategoria</label><div class="chips" id="gCats"></div></div>
+    <button class="btn btn-p" id="gSave" onclick="saveGroc(false)">Dodaj</button>
+    <button class="btn btn-s" id="gMore" style="margin-top:8px" onclick="saveGroc(true)">Dodaj i wpisz kolejny</button>
+    <div class="btns" id="gActions"></div>
+  </div>
+</div>
+
+<!-- ZADANIA MARCIN -->
+<div class="sw" id="taskSheet"><div class="sw-bg" onclick="closeSheet('taskSheet')"></div>
+  <div class="sh">
+    <div class="grab"></div>
+    <div class="sh-h"><h2 id="tTitle">Nowe zadanie</h2><button class="ib" onclick="closeSheet('taskSheet')" aria-label="Zamknij">✕</button></div>
+    <div class="fg"><label class="fl" for="tName">Nazwa zadania</label><input class="in" id="tName" placeholder="np. Zadzwonić do administracji" autocomplete="off"></div>
+    <div class="fg"><label class="fl" for="tDesc">Opis zadania</label><textarea class="in" id="tDesc" placeholder="Szczegóły, notatki"></textarea></div>
+    <div class="fg"><label class="fl">Termin</label>
+      <div class="dt-row"><input class="in" id="tDue" type="date"><input class="in" id="tTime" type="time"></div>
+      <div class="chips quick"><button class="chip" onclick="quickDue(0)">Dziś</button><button class="chip" onclick="quickDue(1)">Jutro</button><button class="chip" onclick="quickDue(7)">Za tydzień</button><button class="chip" onclick="quickDue(null)">Bez terminu</button></div>
+    </div>
+    <button class="btn btn-p" id="tSave" onclick="saveTask()">Dodaj zadanie</button>
+    <div class="btns" id="tActions"></div>
+  </div>
+</div>
 
 <!-- DO KUPIENIA: DODAJ / EDYTUJ -->
 <div class="sw" id="itemSheet"><div class="sw-bg" onclick="closeSheet('itemSheet')"></div>
@@ -431,11 +485,11 @@ const GROUP_ORDER = ['pickup','out','problem','transit','pending','unknown'];
 
 /* ═══ STAN ═══ */
 const LS_KEY = 'parcels-v1';
-let S = {parcels:[], items:[], deleted:{}, settings:{notify:false, auto:true, view:'parcels'}};
-let ui = {view:'parcels', shopTab:'todo', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
+let S = {parcels:[], items:[], groceries:[], tasks:[], deleted:{}, settings:{notify:false, auto:true, view:'parcels'}};
+let ui = {view:'parcels', shopTab:'todo', taskTab:'open', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
 
 function load(){
-  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,items:d.items||[],deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
+  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,items:d.items||[],groceries:d.groceries||[],tasks:d.tasks||[],deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
 }
 function save(push=true){
   try{localStorage.setItem(LS_KEY, JSON.stringify(S))}catch{}
@@ -452,7 +506,7 @@ function mergeState(a, b){
   const deleted = {...(a.deleted||{})};
   for(const [id,ts] of Object.entries(b.deleted||{})) deleted[id] = Math.max(deleted[id]||0, ts||0);
   const out = {deleted};
-  for(const key of ['parcels','items']){
+  for(const key of ['parcels','items','groceries','tasks']){
     const byId = new Map();
     for(const p of [...(a[key]||[]), ...(b[key]||[])]){
       if(!p||!p.id) continue;
@@ -464,20 +518,20 @@ function mergeState(a, b){
   }
   return out;
 }
-function sig(st){ return JSON.stringify([st.parcels,st.items||[]].map(l=>l.map(p=>[p.id,p.u||0])))+JSON.stringify(st.deleted) }
+function sig(st){ return JSON.stringify([st.parcels,st.items||[],st.groceries||[],st.tasks||[]].map(l=>l.map(p=>[p.id,p.u||0])))+JSON.stringify(st.deleted) }
 async function syncNow(loud){
   if(syncing){ syncAgain=true; return }
   syncing=true;
   try{
     const before = sig(S);
-    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, items:S.items, deleted:S.deleted})});
+    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, items:S.items, groceries:S.groceries, tasks:S.tasks, deleted:S.deleted})});
     if(r.status===401){ location.reload(); return }
     if(r.status===503){ syncInfo.state='off'; if(loud) toast('Synchronizacja wyłączona — podłącz bazę w Vercelu'); return }
     if(!r.ok) throw new Error(r.status);
     const remote = await r.json();
     const merged = mergeState(S, remote);           // zmiany zrobione w trakcie wysyłki zostają
     const changed = sig(merged)!==before;
-    S.parcels = merged.parcels; S.items = merged.items; S.deleted = merged.deleted;
+    S.parcels = merged.parcels; S.items = merged.items; S.groceries = merged.groceries; S.tasks = merged.tasks; S.deleted = merged.deleted;
     save(false);
     syncInfo = {state:'on', last:Date.now()};
     if(changed){
@@ -570,7 +624,9 @@ function setCnt(id, n){ const el=$(id); if(el) el.textContent = n?n:'' }
 function render(){
   setCnt('vc-parcels', S.parcels.filter(p=>inTab(p,'active')).length);
   setCnt('vc-shop', S.items.filter(it=>!it.bought).length);
-  if(ui.view==='shop') renderShop(); else renderParcels();
+  setCnt('vc-groc', S.groceries.filter(g=>!g.done).length);
+  setCnt('vc-tasks', S.tasks.filter(t=>!t.done).length);
+  if(ui.view==='shop') renderShop(); else if(ui.view==='groc') renderGroc(); else if(ui.view==='tasks') renderTasks(); else renderParcels();
   renderBento();
 }
 
@@ -584,6 +640,10 @@ const IC = {
   ok:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
   wallet:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2M3 10h18"/></svg>',
   flame:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 6.5-2.6 6.5-6.2 0-3.5-2.6-5.7-4-9.3-2.2 1.6-3 3.7-3 5.4-1-.6-1.7-1.7-1.9-3C7.4 9.6 5.5 12 5.5 14.8 5.5 18.4 8 21 12 21z"/></svg>',
+  grid:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
+  trash:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  plus:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  check:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg>',
   bag:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>',
 };
 const CHEV = '<svg class="t-chev" width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m1.5 1.5 6 6-6 6"/></svg>';
@@ -599,6 +659,8 @@ function wideTile({color, icon, title, sub, act, i=3}){
 }
 function renderBento(){
   const B = $('bento');
+  if(ui.view==='groc'){ B.innerHTML = bentoGroc(); return }
+  if(ui.view==='tasks'){ B.innerHTML = bentoTasks(); return }
   if(ui.view==='shop'){
     const todo = S.items.filter(it=>!it.bought);
     const high = todo.filter(it=>(it.prio||'mid')==='high');
@@ -691,9 +753,18 @@ function plural(n,a,b,c){if(n===1)return a;const m10=n%10,m100=n%100;return(m10>
 const TABS = {
   parcels:[['active','Aktywne'],['delivered','Odebrane'],['archived','Archiwum']],
   shop:[['todo','Do kupienia'],['bought','Kupione']],
+  groc:[],
+  tasks:[['open','Do zrobienia'],['done','Zrobione']],
 };
-function curTab(){ return ui.view==='shop' ? ui.shopTab : ui.tab }
+const VIEW = {
+  parcels:{fab:'Dodaj przesyłkę', ph:'Szukaj po nazwie lub numerze'},
+  shop:{fab:'Dodaj do listy', ph:'Szukaj w rzeczach do kupienia'},
+  groc:{fab:'Dodaj produkt', ph:'Szukaj na liście zakupów'},
+  tasks:{fab:'Dodaj zadanie', ph:'Szukaj w zadaniach'},
+};
+function curTab(){ return ui.view==='shop' ? ui.shopTab : ui.view==='tasks' ? ui.taskTab : ui.tab }
 function renderTabs(){
+  $('tabs').style.display = TABS[ui.view].length ? '' : 'none';
   $('tabs').innerHTML = '<div class="tab-ind" id="tabInd"></div>' + TABS[ui.view].map(([k,l])=>
     `<button class="tab ${curTab()===k?'on':''}" data-tab="${k}">${l}<b id="cnt-${k}"></b></button>`).join('');
 }
@@ -705,22 +776,23 @@ function moveInd(){
 $('tabs').addEventListener('click',e=>{
   const b = e.target.closest('.tab'); if(!b) return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
-  if(ui.view==='shop') ui.shopTab = b.dataset.tab; else ui.tab = b.dataset.tab;
+  if(ui.view==='shop') ui.shopTab = b.dataset.tab; else if(ui.view==='tasks') ui.taskTab = b.dataset.tab; else ui.tab = b.dataset.tab;
   moveInd(); render();
 });
 function setView(v){
+  if(!VIEW[v]) v = 'parcels';
   ui.view = v; S.settings.view = v; save(false);
   document.querySelectorAll('.vw').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
-  $('q').placeholder = v==='shop' ? 'Szukaj na liście zakupów' : 'Szukaj po nazwie lub numerze';
-  $('fabTxt').textContent = v==='shop' ? 'Dodaj do listy' : 'Dodaj przesyłkę';
-  $('refreshAll').style.display = v==='shop' ? 'none' : '';
+  $('q').placeholder = VIEW[v].ph;
+  $('fabTxt').textContent = VIEW[v].fab;
+  $('refreshAll').style.display = v==='parcels' ? '' : 'none';
   ui.q=''; $('q').value='';
   renderTabs(); render(); moveInd();
   window.scrollTo({top:0});
 }
 addEventListener('scroll',()=>$('top').classList.toggle('scrolled', scrollY>4), {passive:true});
 $('views').addEventListener('click',e=>{ const b=e.target.closest('.vw'); if(b && b.dataset.view!==ui.view) setView(b.dataset.view) });
-function openAddCurrent(){ ui.view==='shop' ? openItemSheet(null) : openAdd() }
+function openAddCurrent(){ ({shop:()=>openItemSheet(null), groc:()=>openGrocSheet(null), tasks:()=>openTaskSheet(null)}[ui.view] || openAdd)() }
 $('q').addEventListener('input',e=>{ui.q=e.target.value; render()});
 window.addEventListener('resize', moveInd);
 
@@ -864,6 +936,235 @@ function itemToParcel(){
   const it = S.items.find(x=>x.id===ui.itemId); if(!it) return;
   closeSheet('itemSheet'); setView('parcels');
   setTimeout(()=>{ openAdd(); $('fName').value = it.name; $('fNote').value = it.url||'' }, 50);
+}
+
+/* ═══ LISTA ZAKUPÓW ═══ */
+const GCAT = [
+  ['veg','🥕','Warzywa',['pomidor','ogór','ogor','marchew','marchw','ziemniak','cebul','czosnek','czosnk','papryk','sałat','salat','brokuł','brokul','kalafior','kapust','pietruszk','seler','cukini','bakłażan','szpinak','rzodkiew','burak','buracz','fasolk','groszek','awokado','kukurydz','pieczark','koperek','szczypior','natk','rukol','dyni','imbir']],
+  ['fruit','🍎','Owoce',['jabł','jabl','banan','grusz','pomarańcz','pomarancz','mandaryn','cytryn','limonk','winogron','truskaw','malin','borówk','borowk','kiwi','ananas','arbuz','melon','śliwk','sliwk','brzoskwin','nektaryn','mango','granat','porzeczk','wiśni','wisni','czereśn']],
+  ['bread','🍞','Pieczywo',['chleb','bułk','bulk','bagiet','rogal','tost','grahamk','kajzerk','pieczyw','croissant','tortill','pita','chałk','drożdżówk']],
+  ['dairy','🧀','Nabiał',['mleko','mleka','ser','jogurt','kefir','maślank','śmietan','smietan','masło','maslo','twaróg','twarog','jaj','mozzarell','feta','skyr','margaryn']],
+  ['meat','🍗','Mięso i ryby',['kurczak','pierś','piers','mięso','mieso','wołow','wolow','wieprz','szynk','kiełbas','kielbas','boczek','parówk','parowk','indyk','ryb','łosoś','losos','tuńczyk','tunczyk','dorsz','mielon','salami','schab','udk','skrzydeł','krewetk']],
+  ['dry','🥫','Spożywcze',['makaron','spaghetti','ryż','ryz','kasz','mąk','mak','cukier','sól','sol','olej','oliw','ocet','przypraw','pieprz','sos','ketchup','majonez','musztard','konserw','płatki','platki','musli','dżem','dzem','miód','miod','kawa','kawy','herbat','kakao','fasol','ciecierzyc','soczewic','koncentrat','bulion','drożdż']],
+  ['frozen','❄️','Mrożonki',['mrożon','mrozon','lody','lodów','frytki','pierogi']],
+  ['drinks','🥤','Napoje',['woda','wody','sok','cola','napój','napoj','piwo','piwa','wino','wina','lemoniad','energetyk','tonik']],
+  ['sweets','🍫','Słodycze',['czekolad','baton','ciastk','ciasto','chips','paluszk','orzesz','orzech','cukierk','żelk','zelk','wafel','wafl','krakers','popcorn','herbatnik','pączk']],
+  ['chem','🧴','Chemia',['proszek','płyn','plyn','kapsułk','kapsulk','domestos','ludwik','zmywar','worki','gąbk','gabk','ścierk','scierk','odplamiacz','płukan','plukan','środek','srodek','wybielacz','odświeżacz','żarówk','baterie']],
+  ['hyg','🧻','Higiena',['papier','szampon','mydło','mydlo','żel','zel','pasta','szczoteczk','dezodorant','chusteczk','podpask','tampon','wacik','patyczk','krem','golark','maszynk','pieluch','ręcznik','recznik','nić','odżywk']],
+  ['other','📦','Inne',[]],
+];
+const GC = Object.fromEntries(GCAT.map(([k,e,l])=>[k,{emoji:e,label:l}]));
+function guessCat(name){
+  const words = String(name||'').toLowerCase().split(/[\s,.;:()\-\/]+/).filter(Boolean);
+  for(const [k,,,kws] of GCAT) for(const kw of kws) if(words.some(w=>w.startsWith(kw))) return k;
+  return null;
+}
+let gEdit = null, gCat = 'other', gCatManual = false;
+function grocCard(g, i){
+  return `<div class="card g ${g.done?'done':''}" style="animation-delay:${Math.min(i,10)*25}ms" onclick="openGroc('${g.id}')">
+    <button class="chk ${g.done?'on':''}" onclick="event.stopPropagation();toggleGroc('${g.id}')" aria-label="${g.done?'Odznacz':'Mam w koszyku'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>
+    <div class="ci"><h3>${esc(g.name)}</h3></div>
+    ${g.qty?`<span class="qty">${esc(g.qty)}</span>`:''}
+  </div>`;
+}
+function renderGroc(){
+  const q = ui.q.trim().toLowerCase();
+  let all = S.groceries;
+  if(q) all = all.filter(g=>(g.name||'').toLowerCase().includes(q)||(g.qty||'').toLowerCase().includes(q));
+  const todo = all.filter(g=>!g.done), done = all.filter(g=>g.done);
+  const L = $('list');
+  if(!todo.length && !done.length){
+    L.innerHTML = `<div class="empty"><div class="em-ic" style="font-size:36px">🛒</div><h2>${q?'Nic nie znaleziono':'Lista zakupów jest pusta'}</h2><p>${q?'Spróbuj innej nazwy.':'Dodaj produkty, a aplikacja sama przypisze kategorię: warzywa, owoce, pieczywo, chemię…'}</p></div>`;
+    return;
+  }
+  let html='', i=0;
+  for(const [k] of GCAT){
+    const g = todo.filter(x=>(x.cat||'other')===k).sort((a,b)=>a.name.localeCompare(b.name,'pl'));
+    if(!g.length) continue;
+    html += `<section class="grp" id="g-${k}"><div class="grp-h"><span class="g-emo">${GC[k].emoji}</span>${GC[k].label}<span class="grp-sum">${g.length}</span></div>${g.map(x=>grocCard(x,i++)).join('')}</section>`;
+  }
+  if(!todo.length) html += `<div class="empty" style="padding:28px 20px 10px"><h2>Wszystko w koszyku 🎉</h2></div>`;
+  if(done.length){
+    done.sort((a,b)=>new Date(b.doneAt||0)-new Date(a.doneAt||0));
+    html += `<section class="grp" id="g-done"><div class="grp-h" style="color:var(--t2)">W koszyku<button class="grp-act" onclick="clearGrocDone()">Wyczyść</button></div>${done.map(x=>grocCard(x,i++)).join('')}</section>`;
+  }
+  L.innerHTML = html;
+}
+function renderGCatChips(){
+  $('gCats').innerHTML = GCAT.map(([k,e,l])=>`<button class="chip ${gCat===k?'on':''}" onclick="gCat='${k}';gCatManual=true;renderGCatChips()"><span>${e}</span>${l}</button>`).join('');
+}
+function openGroc(id){ openGrocSheet(S.groceries.find(x=>x.id===id)) }
+function openGrocSheet(g){
+  gEdit = g?g.id:null;
+  $('gTitle').textContent = g?'Edytuj produkt':'Dodaj produkt';
+  $('gName').value = g?g.name:''; $('gQty').value = g?(g.qty||''):'';
+  gCat = g?(g.cat||'other'):'other'; gCatManual = !!g;
+  renderGCatChips();
+  $('gSave').textContent = g?'Zapisz':'Dodaj';
+  $('gMore').style.display = g?'none':'';
+  $('gActions').innerHTML = g?`<button class="btn btn-s" onclick="toggleGroc('${g.id}',true)">${g.done?'Wróć na listę':'✓ W koszyku'}</button><button class="btn btn-d" onclick="delGroc()">Usuń</button>`:'';
+  openSheet('grocSheet');
+  if(!g) setTimeout(()=>$('gName').focus(),350);
+}
+function onGName(){
+  if(gCatManual) return;
+  const c = guessCat($('gName').value);
+  if(c && c!==gCat){ gCat=c; renderGCatChips() }
+}
+function saveGroc(keepOpen){
+  const name = $('gName').value.trim();
+  if(!name){ toast('Wpisz nazwę produktu'); $('gName').focus(); return }
+  const data = {name, qty:$('gQty').value.trim(), cat:gCat};
+  if(gEdit){ const g=S.groceries.find(x=>x.id===gEdit); Object.assign(g,data); touch(g) }
+  else S.groceries.unshift({id:uid(), ...data, done:false, doneAt:null, created:new Date().toISOString(), u:Date.now()});
+  save(); render();
+  if(keepOpen){
+    toast(`Dodano: ${name}`);
+    $('gName').value=''; $('gQty').value=''; gCatManual=false; gCat='other'; renderGCatChips(); $('gName').focus();
+  }else{ closeSheet('grocSheet'); toast(gEdit?'Zapisano ✓':'Dodano ✓') }
+}
+function toggleGroc(id, fromSheet){
+  const g=S.groceries.find(x=>x.id===id); if(!g) return;
+  g.done=!g.done; g.doneAt=g.done?new Date().toISOString():null; touch(g);
+  save(); render(); if(fromSheet) closeSheet('grocSheet');
+}
+function delGroc(){
+  const g=S.groceries.find(x=>x.id===gEdit); if(!g) return;
+  S.deleted[g.id]=Date.now(); S.groceries=S.groceries.filter(x=>x.id!==g.id);
+  save(); render(); closeSheet('grocSheet'); toast('Usunięto');
+}
+function clearGrocDone(){
+  const done = S.groceries.filter(g=>g.done); if(!done.length) return;
+  if(!confirm(`Usunąć z listy ${done.length} ${plural(done.length,'produkt','produkty','produktów')} z koszyka?`)) return;
+  for(const g of done) S.deleted[g.id]=Date.now();
+  S.groceries = S.groceries.filter(g=>!g.done);
+  save(); render(); toast('Wyczyszczono koszyk');
+}
+
+/* ═══ ZADANIA MARCIN ═══ */
+const TB = {
+  late:{label:'Po terminie', color:'var(--c-problem)'},
+  today:{label:'Dziś', color:'var(--c-out)'},
+  tomorrow:{label:'Jutro', color:'var(--c-transit)'},
+  week:{label:'W tym tygodniu', color:'var(--c-pickup)'},
+  later:{label:'Później', color:'var(--c-pending)'},
+  none:{label:'Bez terminu', color:'var(--c-unknown)'},
+};
+const TB_ORDER = ['late','today','tomorrow','week','later','none'];
+function taskBucket(t){
+  const d = dayDiff(t.due); if(d===null) return 'none';
+  return d<0?'late':d===0?'today':d===1?'tomorrow':d<=7?'week':'later';
+}
+function dueLabel(t){
+  const d = dayDiff(t.due); if(d===null) return '';
+  let s = d===0?'Dziś':d===1?'Jutro':d===-1?'Wczoraj':d<-1?`${-d} dni temu`:d<7?new Date(t.due+'T00:00').toLocaleDateString('pl-PL',{weekday:'short'}):fmtDate(t.due,false);
+  if(t.time) s += ', '+t.time;
+  return s;
+}
+function taskSort(a,b){
+  const da=a.due?a.due+(a.time||'99'):'9999', db=b.due?b.due+(b.time||'99'):'9999';
+  return da<db?-1:da>db?1:new Date(a.created)-new Date(b.created);
+}
+let tEdit = null;
+function taskCard(t, i){
+  const b = taskBucket(t);
+  const col = t.done?'var(--t3)':(b==='late'?'var(--c-problem)':b==='today'?'var(--c-out)':'var(--t2)');
+  return `<div class="card tk ${t.done?'done':''}" style="animation-delay:${Math.min(i,10)*25}ms" onclick="openTask('${t.id}')">
+    <button class="chk ${t.done?'on':''}" onclick="event.stopPropagation();toggleTask('${t.id}')" aria-label="${t.done?'Odznacz':'Zrobione'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>
+    <div class="ci"><h3>${esc(t.title)}</h3>${t.desc?`<p>${esc(t.desc)}</p>`:''}</div>
+    ${t.due?`<span class="due" style="color:${col}">${esc(dueLabel(t))}</span>`:''}
+  </div>`;
+}
+function renderTasks(){
+  const q = ui.q.trim().toLowerCase();
+  let all = S.tasks;
+  setCnt('cnt-open', all.filter(t=>!t.done).length); setCnt('cnt-done', all.filter(t=>t.done).length);
+  if(q) all = all.filter(t=>(t.title||'').toLowerCase().includes(q)||(t.desc||'').toLowerCase().includes(q));
+  const L = $('list');
+  const list = all.filter(t=>ui.taskTab==='done'?t.done:!t.done);
+  if(!list.length){
+    const m = q?['Nic nie znaleziono','Spróbuj innej nazwy.']:ui.taskTab==='done'?['Nic jeszcze nie zrobiono','Odhaczone zadania pojawią się tutaj.']:['Brak zadań','Dodaj zadanie: nazwę, opis i termin.'];
+    L.innerHTML = `<div class="empty"><div class="em-ic" style="font-size:34px">✅</div><h2>${m[0]}</h2><p>${m[1]}</p></div>`;
+    return;
+  }
+  if(ui.taskTab==='done'){
+    list.sort((a,b)=>new Date(b.doneAt||0)-new Date(a.doneAt||0));
+    L.innerHTML = list.map(taskCard).join(''); return;
+  }
+  let html='', i=0;
+  for(const k of TB_ORDER){
+    const g = list.filter(t=>taskBucket(t)===k).sort(taskSort);
+    if(!g.length) continue;
+    html += `<section class="grp" id="g-${k}"><div class="grp-h"><i style="background:${TB[k].color}"></i>${TB[k].label}<span class="grp-sum">${g.length}</span></div>${g.map(t=>taskCard(t,i++)).join('')}</section>`;
+  }
+  L.innerHTML = html;
+}
+function openTask(id){ openTaskSheet(S.tasks.find(x=>x.id===id)) }
+function openTaskSheet(t){
+  tEdit = t?t.id:null;
+  $('tTitle').textContent = t?'Edytuj zadanie':'Nowe zadanie';
+  $('tName').value = t?t.title:''; $('tDesc').value = t?(t.desc||''):'';
+  $('tDue').value = t?(t.due||''):''; $('tTime').value = t?(t.time||''):'';
+  $('tSave').textContent = t?'Zapisz':'Dodaj zadanie';
+  $('tActions').innerHTML = t?`<button class="btn btn-s" onclick="toggleTask('${t.id}',true)">${t.done?'Przywróć':'✓ Zrobione'}</button><button class="btn btn-d" onclick="delTask()">Usuń</button>`:'';
+  openSheet('taskSheet');
+  if(!t) setTimeout(()=>$('tName').focus(),350);
+}
+function quickDue(days){
+  if(days===null){ $('tDue').value=''; $('tTime').value=''; return }
+  const d=new Date(); d.setDate(d.getDate()+days);
+  $('tDue').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function saveTask(){
+  const title = $('tName').value.trim();
+  if(!title){ toast('Wpisz nazwę zadania'); $('tName').focus(); return }
+  const data = {title, desc:$('tDesc').value.trim(), due:$('tDue').value||'', time:$('tDue').value?($('tTime').value||''):''};
+  if(tEdit){ const t=S.tasks.find(x=>x.id===tEdit); Object.assign(t,data); touch(t) }
+  else{
+    S.tasks.unshift({id:uid(), ...data, done:false, doneAt:null, created:new Date().toISOString(), u:Date.now()});
+    if(ui.taskTab!=='open'){ ui.taskTab='open'; renderTabs(); moveInd() }
+  }
+  save(); render(); closeSheet('taskSheet'); toast(tEdit?'Zapisano ✓':'Dodano zadanie ✓');
+}
+function toggleTask(id, fromSheet){
+  const t=S.tasks.find(x=>x.id===id); if(!t) return;
+  t.done=!t.done; t.doneAt=t.done?new Date().toISOString():null; touch(t);
+  save(); render(); if(fromSheet) closeSheet('taskSheet');
+  toast(t.done?'Zrobione ✓':'Przywrócono');
+}
+function delTask(){
+  const t=S.tasks.find(x=>x.id===tEdit); if(!t) return;
+  if(!confirm(`Usunąć zadanie „${t.title}”?`)) return;
+  S.deleted[t.id]=Date.now(); S.tasks=S.tasks.filter(x=>x.id!==t.id);
+  save(); render(); closeSheet('taskSheet'); toast('Usunięto');
+}
+
+/* ═══ BENTO: zakupy + zadania ═══ */
+function bentoGroc(){
+  const todo = S.groceries.filter(g=>!g.done), done = S.groceries.filter(g=>g.done);
+  const cats = new Set(todo.map(g=>g.cat||'other'));
+  return tile({cls:'big', color:'var(--c-delivered)', icon:IC.bag, n:todo.length, label:'Lista zakupów',
+      list: todo.length ? todo.slice(0,3).map(g=>`<span>${esc(g.name)}</span>`).join('') : '<span style="color:var(--t2)">Pusto</span>', act:"scrollToGrp('none')", i:0}) +
+    tile({color:'var(--c-transit)', icon:IC.ok, n:done.length, label:'W koszyku', act:"scrollToGrp('done')", i:1}) +
+    tile({color:'var(--c-out)', icon:IC.grid, n:cats.size, label:cats.size?[...cats].map(k=>GC[k].emoji).join(' '):'Kategorie', act:"scrollToGrp('none')", i:2}) +
+    (done.length ? wideTile({color:'var(--c-problem)', icon:IC.trash, title:`Wyczyść koszyk (${done.length})`, sub:'Usuń odhaczone produkty z listy', act:'clearGrocDone()'})
+                 : wideTile({color:'var(--c-delivered)', icon:IC.plus, title:'Dodaj produkty', sub:'Kategoria dobierze się sama', act:'openGrocSheet(null)'}));
+}
+function bentoTasks(){
+  const open = S.tasks.filter(t=>!t.done).sort(taskSort);
+  const today = open.filter(t=>taskBucket(t)==='today'), late = open.filter(t=>taskBucket(t)==='late');
+  const next = open.find(t=>t.due && dayDiff(t.due)>=0);
+  return tile({cls:'big', color:'var(--link)', icon:IC.check, n:open.length, label:'Zadania Marcin',
+      list: open.length ? open.slice(0,3).map(t=>`<span>${esc(t.title)}</span>`).join('') : '<span style="color:var(--t2)">Wszystko zrobione</span>', act:"goTasks('open')", i:0}) +
+    tile({color:'var(--c-out)', icon:IC.cal, n:today.length, label:'Na dziś', act:"goTasks('open','today')", i:1}) +
+    tile({color:'var(--c-problem)', icon:IC.problem, n:late.length, label:'Po terminie', act:"goTasks('open','late')", i:2}) +
+    (next ? wideTile({color:'var(--c-transit)', icon:IC.cal, title:next.title, sub:`Najbliższy termin · ${dueLabel(next)}`, act:`openTask('${next.id}')`})
+          : wideTile({color:'var(--link)', icon:IC.plus, title:'Dodaj zadanie', sub:'Nazwa, opis i termin', act:'openTaskSheet(null)'}));
+}
+function goTasks(tab, grp){
+  ui.q=''; $('q').value='';
+  if(ui.taskTab!==tab){ ui.taskTab=tab; renderTabs(); render(); moveInd() }
+  setTimeout(()=>scrollToGrp(grp||'none'), 30);
 }
 
 /* ═══ ARKUSZE ═══ */
@@ -1121,6 +1422,7 @@ function importData(e){
     for(const p of d.parcels){ if(p&&p.number&&!have.has(p.number)){ S.parcels.push({events:[],status:'unknown',...p,id:p.id||uid(),u:Date.now()}); n++ } }
     const haveIt=new Set(S.items.map(x=>x.id));
     for(const it of (d.items||[])){ if(it&&it.name&&!haveIt.has(it.id)){ S.items.push({...it,id:it.id||uid(),u:Date.now()}); n++ } }
+    for(const key of ['groceries','tasks']){ const have=new Set(S[key].map(x=>x.id)); for(const x of (d[key]||[])){ if(x&&!have.has(x.id)){ S[key].push({...x,id:x.id||uid(),u:Date.now()}); n++ } } }
     save(); render(); toast(`Zaimportowano ${n} ${plural(n,'pozycję','pozycje','pozycji')}`);
   }catch{ toast('Nieprawidłowy plik') } };
   r.readAsText(f); e.target.value='';
@@ -1179,7 +1481,7 @@ function closeScan(){
 
 /* ═══ START ═══ */
 (async function init(){
-  load(); setView(S.settings.view==='shop'?'shop':'parcels');
+  load(); setView(S.settings.view||'parcels');
   setTimeout(moveInd, 300);
   await syncNow(false);
   setupAuto();

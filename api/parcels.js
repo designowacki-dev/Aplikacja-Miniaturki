@@ -1,4 +1,4 @@
-// Synchronizacja przesyłek i listy do kupienia między telefonami.
+// Synchronizacja przesyłek, rzeczy do kupienia, listy zakupów i zadań między telefonami.
 // Baza: Upstash Redis (Vercel → Storage → Upstash). Każde urządzenie wysyła swoją listę,
 // serwer łączy ją z zapisaną (nowsza wersja paczki wygrywa, usunięte zostają usunięte)
 // i odsyła wynik — dzięki temu paczki dodane na dwóch telefonach naraz się nie gubią.
@@ -40,7 +40,7 @@ export function mergeState(a, b) {
   for (const id of Object.keys(deleted)) if (now - deleted[id] > TOMBSTONE_TTL) delete deleted[id];
 
   const out = { deleted };
-  for (const key of ['parcels', 'items']) {   // przesyłki i lista do kupienia
+  for (const key of ['parcels', 'items', 'groceries', 'tasks']) {   // przesyłki, do kupienia, lista zakupów, zadania
     const byId = new Map();
     for (const p of [...(a[key] || []), ...(b[key] || [])]) {
       if (!p || !p.id) continue;
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
     let stored = parse(await redis(['GET', KEY]));
     if (!stored) {
       const old = parse(await redis(['GET', OLD_KEY]));
-      stored = old && Array.isArray(old.parcels) ? { parcels: old.parcels, items: [], deleted: {} } : { parcels: [], items: [], deleted: {} };
+      stored = old && Array.isArray(old.parcels) ? { parcels: old.parcels, deleted: {} } : { parcels: [], deleted: {} };
     }
 
     if (req.method === 'GET') {
@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     }
     if (req.method === 'POST') {
       const body = parse(req.body) || {};
-      const merged = mergeState(stored, { parcels: body.parcels || [], items: body.items || [], deleted: body.deleted || {} });
+      const merged = mergeState(stored, { parcels: body.parcels || [], items: body.items || [], groceries: body.groceries || [], tasks: body.tasks || [], deleted: body.deleted || {} });
       await redis(['SET', KEY, JSON.stringify(merged)]);
       res.status(200).json(merged);
       return;

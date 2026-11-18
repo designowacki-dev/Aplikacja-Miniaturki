@@ -47,7 +47,7 @@ function page(body, status = 200, headers = {}) {
 body{min-height:100vh;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px;-webkit-font-smoothing:antialiased}
 .box{width:100%;max-width:360px}
 .ic{width:72px;height:72px;border-radius:18px;display:block;margin-bottom:22px}
-h1{font-size:28px;font-weight:800;letter-spacing:-.6px}
+h1{font-size:28px;font-weight:800;letter-spacing:-.6px;margin-bottom:22px}
 p{font-size:15px;color:var(--t2);margin:6px 0 24px;line-height:1.45}
 input{width:100%;height:52px;border-radius:14px;border:1px solid var(--bord);background:var(--s1);color:var(--t1);padding:0 16px;font-size:17px;outline:none;-webkit-appearance:none;font-family:inherit}
 input:focus{border-color:var(--t1)}
@@ -63,7 +63,7 @@ ${body}</div></body></html>`,
 
 function loginPage(error) {
   return page(
-    `<h1>Nasze mieszkanie</h1><p>Wpisz hasło, żeby wejść.</p>
+    `<h1>Wpisz Hasło do Domu:</h1>
 <form method="POST" action="/__login">
 <input type="password" name="password" placeholder="Hasło" autocomplete="current-password" autofocus required>
 <button type="submit">Wejdź</button>
