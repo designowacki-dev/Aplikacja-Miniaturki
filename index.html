@@ -1645,7 +1645,8 @@ function homeState(){
   }
   const on = t => S.devices.some(d=>d.type===t && d.on);
   const vac = S.devices.find(d=>isVac(d) && d.cleaning);
-  return {rooms, coffee:on('coffee'), washer:on('washer'), tv:on('tv'), vacuum:vac?vac.cleaning.zone:null, selected:ui.homeTab!=='all'?ui.homeTab:null};
+  const isOn = id => !!(S.devices.find(d=>d.id===id)||{}).on;
+  return {rooms, coffee:on('coffee'), washer:on('washer'), tv:on('tv'), vacuum:vac?vac.cleaning.zone:null, lamp:isOn('dev-lampka'), counterLight:isOn('dev-kuchnia-light'), selected:ui.homeTab!=='all'?ui.homeTab:null};
 }
 function update3D(){
   const on = S.devices.filter(d=>d.on).length;
