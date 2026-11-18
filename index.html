@@ -167,6 +167,12 @@ body.v-home .h3{display:block}
 .dev.on{background:var(--navy);color:var(--navy-t)}
 .dev-ic{position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s}
 .dev.on .dev-ic{background:#FFD38F;color:#0E1F45;box-shadow:0 0 22px -2px rgba(255,190,90,.65)}
+.open-b{position:absolute;top:18px;right:14px;height:32px;padding:0 15px;border-radius:16px;background:var(--navy);color:var(--navy-t);font-size:13px;font-weight:500;transition:transform .2s var(--e-out)}
+.open-b:active{transform:scale(.93)}
+.open-b.big{position:static;height:40px;padding:0 20px;border-radius:20px;font-size:15px;flex-shrink:0}
+.dev.mom.opened{background:#DDF5E7;color:#0E1F45}
+.dev.mom.opened .dev-ic{background:#22A06B;color:#fff}
+@media (prefers-color-scheme:dark){.dev.mom.opened{background:#16402D;color:#fff}}
 .dev-n{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dev-s{font-size:13px;opacity:.6;margin-top:2px}
 .tgl{position:absolute;top:18px;right:14px;width:48px;height:28px;border-radius:14px;background:var(--s3);transition:background .25s}
@@ -200,7 +206,9 @@ body.v-home .h3{display:block}
 .tab{flex:1;height:36px;border-radius:20px;font-size:14px;font-weight:500;color:var(--t2);position:relative;z-index:1;transition:color .3s var(--e-out)}
 .tab.on{color:var(--navy-t)}
 .tab b{font-size:12px;font-weight:500;margin-left:4px;opacity:.6}
-body.v-home .tab{font-size:13px;padding:0 2px}
+body.v-home .tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+body.v-home .tabs::-webkit-scrollbar{display:none}
+body.v-home .tab{flex:0 0 auto;font-size:14px;padding:0 15px}
 body.v-home .tab b{display:none}
 .tab-ind{position:absolute;top:4px;bottom:4px;left:4px;border-radius:20px;background:var(--seg-on);transition:transform .4s var(--e-drawer),width .4s var(--e-drawer);z-index:0}
 
@@ -409,7 +417,7 @@ textarea.in{height:auto;min-height:84px;padding:14px 18px;resize:vertical}
     <div class="grab"></div>
     <div class="sh-h"><div><h2 id="dvTitle">Urządzenie</h2><p class="sub-h" id="dvRoomSub" style="margin:2px 0 0"></p></div><button class="ib" onclick="closeSheet('devSheet')" aria-label="Zamknij">✕</button></div>
     <div class="dc" id="dvControl">
-      <div class="dc-top"><span class="dc-ic" id="dvIc"></span><span class="dc-st" id="dvState"></span><button class="tgl" id="dvTgl" onclick="toggleDevice(ui.devId)" aria-label="Włącz / wyłącz"><i></i></button></div>
+      <div class="dc-top"><span class="dc-ic" id="dvIc"></span><span class="dc-st" id="dvState"></span><button class="tgl" id="dvTgl" onclick="toggleDevice(ui.devId)" aria-label="Włącz / wyłącz"><i></i></button><button class="open-b big" id="dvOpen" onclick="openDevice(ui.devId)">Otwórz</button></div>
       <div class="dc-range" id="dvRangeW"><input type="range" id="dvRange" min="1" max="100" oninput="devRange(this.value)" onchange="devRange(this.value,true)"><b id="dvPct"></b></div>
     </div>
     <div class="fg"><label class="fl" for="dvName">Nazwa</label><input class="in" id="dvName" placeholder="np. Światło w salonie" autocomplete="off"></div>
@@ -418,6 +426,7 @@ textarea.in{height:auto;min-height:84px;padding:14px 18px;resize:vertical}
     <div class="fg"><label class="fl">Sterowanie</label><div class="chips" id="dvKinds"></div>
       <p class="small-note" id="dvDemo">Tryb demo: przełącznik działa w aplikacji i synchronizuje się między telefonami, ale nie steruje prawdziwym urządzeniem.</p>
       <div id="dvHA" style="margin-top:10px"><input class="in mono" id="dvEntity" placeholder="entity_id, np. light.salon" autocomplete="off" autocapitalize="off" spellcheck="false"><p class="small-note">Nazwa encji z Home Assistant (Ustawienia → Encje). Wymaga zmiennych HA_URL i HA_TOKEN w Vercelu.</p></div>
+      <div id="dvSC" style="margin-top:10px"><input class="in" id="dvScOn" placeholder="Nazwa skrótu" autocomplete="off"><input class="in" id="dvScOff" placeholder="Skrót wyłączający" autocomplete="off" style="margin-top:8px"><p class="small-note">W aplikacji urządzenia (np. Blue Bolt) użyj „Dodaj do Siri” i nadaj skrótowi dokładnie tę nazwę. Przycisk uruchomi go przez aplikację Skróty.</p></div>
       <div id="dvWH" style="margin-top:10px"><input class="in" id="dvOn" type="url" placeholder="Adres https do włączenia" autocomplete="off" autocapitalize="off"><input class="in" id="dvOff" type="url" placeholder="Adres https do wyłączenia" autocomplete="off" autocapitalize="off" style="margin-top:8px"><p class="small-note">Np. webhook z IFTTT, Shelly Cloud albo Tuya.</p></div>
     </div>
     <button class="btn btn-p" id="dvSave" onclick="saveDev()">Zapisz</button>
@@ -985,7 +994,7 @@ function plural(n,a,b,c){if(n===1)return a;const m10=n%10,m100=n%100;return(m10>
 
 /* ═══ ZAKŁADKI ═══ */
 const TABS = {
-  home:[['all','Wszystko'],['salon','Salon'],['sypialnia','Sypialnia'],['lazienka','Łazienka'],['przedpokoj','Hol']],
+  home:[['all','Wszystko'],['salon','Salon'],['sypialnia','Sypialnia'],['lazienka','Łazienka'],['przedpokoj','Hol'],['osiedle','Osiedle']],
   parcels:[['active','Aktywne'],['delivered','Odebrane'],['archived','Archiwum']],
   shop:[['todo','Do kupienia'],['bought','Kupione']],
   groc:[],
@@ -1387,7 +1396,7 @@ function goTasks(tab, grp){
 }
 
 /* ═══ DOM (smart home) ═══ */
-const ROOMS_UI = {salon:'Salon', sypialnia:'Sypialnia', lazienka:'Łazienka', przedpokoj:'Przedpokój'};
+const ROOMS_UI = {salon:'Salon', sypialnia:'Sypialnia', lazienka:'Łazienka', przedpokoj:'Przedpokój', osiedle:'Osiedle'};
 const DI = {
   light:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>',
   coffee:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3c0 1 1 1.5 1 2.5S8 7 8 7M12 3c0 1 1 1.5 1 2.5S12 7 12 7"/></svg>',
@@ -1395,8 +1404,15 @@ const DI = {
   tv:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8"/></svg>',
   ac:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 6l2.5-1.5M9.5 19.5 12 18l2.5 1.5"/></svg>',
   other:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>',
+  gate:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M6 21v-9h12v9M6 15h12M6 18h12"/></svg>',
+  lift:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M12 3v18M8.5 9 10 7.5 11.5 9M12.5 15l1.5 1.5 1.5-1.5"/></svg>',
+  barrier:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V9M3 21h4M5 11 21 5"/><circle cx="5" cy="9" r="2"/></svg>',
+  door:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14.5 12h.01"/></svg>',
 };
-const DTYPES = {light:'Światło', coffee:'Ekspres', plug:'Gniazdko', tv:'Telewizor', ac:'Klimatyzacja', other:'Inne'};
+const DTYPES = {light:'Światło', coffee:'Ekspres', plug:'Gniazdko', tv:'Telewizor', ac:'Klimatyzacja', gate:'Brama', lift:'Winda', barrier:'Szlaban', door:'Drzwi', other:'Inne'};
+// urządzenia „na impuls” — mają przycisk Otwórz zamiast przełącznika
+const MOMENTARY = new Set(['gate','lift','barrier','door']);
+const isMom = d => MOMENTARY.has(d.type);
 const DEFAULT_DEVICES = [
   ['dev-salon-light','Światło','light','salon',80],
   ['dev-kuchnia-light','Światło nad blatem','light','salon',100],
@@ -1415,6 +1431,14 @@ function seedDevices(){
     if(!have.has(id) && !S.deleted[id]) S.devices.push({id,name,type,room,on:false,level:level??null,conn:{kind:'demo'},created:new Date(0).toISOString(),u:1});
   S.settings.devSeeded = true;
 }
+const OSIEDLE = [['dev-brama','Brama garażowa','gate'],['dev-winda-1','Winda -1p.','lift'],['dev-winda-0','Winda 0p.','lift'],['dev-szlaban','Szlaban','barrier']];
+function seedOsiedle(){
+  if(S.settings.osiedleSeeded) return;
+  const have = new Set(S.devices.map(d=>d.id));
+  for(const [id,name,type] of OSIEDLE)
+    if(!have.has(id) && !S.deleted[id]) S.devices.push({id,name,type,room:'osiedle',on:false,level:null,conn:{kind:'shortcut',shortcutOn:name},created:new Date(0).toISOString(),u:1});
+  S.settings.osiedleSeeded = true;
+}
 const MOON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
 const SOFA = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v4H3zM5 17v2M19 17v2"/></svg>';
 const DOOR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h8M14 3l5 2v14l-5 2zM11 12h.01"/></svg>';
@@ -1425,12 +1449,18 @@ const SCENES = [
   {id:'away', name:'Wychodzę', icon:DOOR, f:d=> d.type==='plug'?null:{on:false}},
 ];
 function devStatus(d){
+  if(isMom(d)) return d.lastOpen ? `Otwarto ${fmtDate(d.lastOpen)}` : (d.conn&&d.conn.kind==='shortcut' ? 'Skrót iPhone’a' : 'Gotowe');
   if(!d.on) return 'Wyłączone';
   if(d.type==='light' && d.level!=null) return `Włączone · ${d.level}%`;
   if(d.type==='coffee') return 'Włączony';
   return 'Włączone';
 }
 function devTile(d, i){
+  if(isMom(d)) return `<div class="dev mom t-${d.type}" id="dt-${d.id}" onclick="openDev('${d.id}')">
+    <span class="dev-ic">${DI[d.type]||DI.other}</span>
+    <button class="open-b" onclick="event.stopPropagation();openDevice('${d.id}')">Otwórz</button>
+    <span class="dev-n">${esc(d.name)}</span><span class="dev-s">${esc(devStatus(d))}</span>
+  </div>`;
   return `<div class="dev ${d.on?'on':''} t-${d.type}" onclick="openDev('${d.id}')">
     <span class="dev-ic">${DI[d.type]||DI.other}</span>
     <button class="tgl ${d.on?'on':''}" onclick="event.stopPropagation();toggleDevice('${d.id}')" aria-label="${d.on?'Wyłącz':'Włącz'}"><i></i></button>
@@ -1460,11 +1490,11 @@ function renderHome(){
 }
 function bentoHome(){
   const lights = S.devices.filter(d=>d.type==='light'), lOn = lights.filter(d=>d.on).length;
-  const on = S.devices.filter(d=>d.on).length;
+  const tog = S.devices.filter(d=>!isMom(d)), on = tog.filter(d=>d.on).length;
   const rooms = new Set(S.devices.filter(d=>d.type==='light'&&d.on).map(d=>d.room)).size;
   return overview('Dom', [
       {label:'Światła', n:lOn, unit:`z ${lights.length}`, icon:MI.bulb, color:'#E9A23B', act:"setHomeTab('all')"},
-      {label:'Urządzenia', n:on, unit:`z ${S.devices.length} wł.`, icon:MI.grid, color:'var(--link)', act:"setHomeTab('all')"},
+      {label:'Urządzenia', n:on, unit:`z ${tog.length} wł.`, icon:MI.grid, color:'var(--link)', act:"setHomeTab('all')"},
       {label:'Pokoje', n:rooms, unit:'ze światłem', icon:MI.box, color:'var(--c-delivered)', act:"setHomeTab('all')"},
     ]) +
     quick(SCENES.map(s=>({icon:s.icon, label:s.name, act:`applyScene('${s.id}')`})));
@@ -1498,12 +1528,18 @@ function setHomeTab(k){
   if(ui.view!=='home') return;
   ui.homeTab = k; renderTabs(); render(); moveInd(); update3D();
 }
+function goShortcut(name){ location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name) }
 async function setDevice(d, patch, silent){
   const prev = {on:d.on, level:d.level};
   Object.assign(d, patch); touch(d); save(); render(); update3D();
   if(ui.devId===d.id && $('devSheet').classList.contains('on')) paintDevControl();
   const kind = (d.conn&&d.conn.kind)||'demo';
   if(kind==='demo') return true;
+  if(kind==='shortcut'){
+    const n = d.on===false ? d.conn.shortcutOff : d.conn.shortcutOn;
+    if(n && !silent) goShortcut(n);
+    return true;
+  }
   const action = d.on===false ? 'off' : (patch.level!=null && prev.on) ? 'level' : 'on';
   try{
     const r = await fetch('/api/device',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action, level:d.level, conn:d.conn})});
@@ -1518,6 +1554,28 @@ async function setDevice(d, patch, silent){
     return false;
   }
 }
+async function openDevice(id){
+  const d = S.devices.find(x=>x.id===id); if(!d) return;
+  if(navigator.vibrate) navigator.vibrate(15);
+  const kind = (d.conn&&d.conn.kind)||'demo';
+  const done = () => {
+    d.lastOpen = new Date().toISOString(); touch(d); save(); render();
+    const t = $('dt-'+d.id); if(t){ t.classList.add('opened'); setTimeout(()=>t.classList.remove('opened'), 1600) }
+    if(ui.devId===d.id && $('devSheet').classList.contains('on')) paintDevControl();
+  };
+  if(kind==='shortcut'){
+    if(!d.conn.shortcutOn){ toast('Ustaw nazwę skrótu'); openDev(id); return }
+    done(); goShortcut(d.conn.shortcutOn); return;
+  }
+  if(kind==='demo'){ done(); toast(`${d.name}: otwarto (demo)`); return }
+  try{
+    const r = await fetch('/api/device',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'open', conn:d.conn})});
+    if(r.status===401){ location.reload(); return }
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || j.error) throw new Error(j.error||('HTTP '+r.status));
+    done(); toast(`${d.name}: otwarto ✓`);
+  }catch(e){ toast(`${d.name}: ${e.message||'błąd połączenia'}`) }
+}
 function toggleDevice(id){
   const d = S.devices.find(x=>x.id===id); if(!d) return;
   if(navigator.vibrate) navigator.vibrate(12);
@@ -1526,7 +1584,7 @@ function toggleDevice(id){
 async function applyScene(id){
   const sc = SCENES.find(s=>s.id===id); if(!sc) return;
   const jobs = [];
-  for(const d of S.devices){ const p = sc.f(d); if(p && (p.on!==d.on || (p.level!=null && p.level!==d.level))) jobs.push(setDevice(d, p, true)) }
+  for(const d of S.devices){ if(isMom(d)) continue; const p = sc.f(d); if(p && (p.on!==d.on || (p.level!=null && p.level!==d.level))) jobs.push(setDevice(d, p, true)) }
   toast(`Scena: ${sc.name}`);
   const res = await Promise.all(jobs);
   if(res.includes(false)) toast('Część urządzeń nie odpowiedziała');
@@ -1556,6 +1614,7 @@ function openDevSheet(d){
   $('dvControl').style.display = d ? '' : 'none';
   $('dvName').value = devDraft.name;
   $('dvEntity').value = devDraft.conn.entity||''; $('dvOn').value = devDraft.conn.onUrl||''; $('dvOff').value = devDraft.conn.offUrl||'';
+  $('dvScOn').value = devDraft.conn.shortcutOn||''; $('dvScOff').value = devDraft.conn.shortcutOff||'';
   $('dvSave').textContent = d ? 'Zapisz ustawienia' : 'Dodaj urządzenie';
   $('dvDel').style.display = d ? '' : 'none';
   paintDevChips(); if(d) paintDevControl();
@@ -1569,6 +1628,8 @@ function paintDevControl(){
   $('dvIc').innerHTML = DI[d.type]||DI.other;
   $('dvState').textContent = devStatus(d);
   $('dvTgl').classList.toggle('on', !!d.on);
+  $('dvTgl').style.display = isMom(d) ? 'none' : '';
+  $('dvOpen').style.display = isMom(d) ? '' : 'none';
   const showR = d.type==='light';
   $('dvRangeW').style.display = showR ? '' : 'none';
   if(showR){ $('dvRange').value = d.level??100; $('dvPct').textContent = (d.level??100)+'%' }
@@ -1576,11 +1637,17 @@ function paintDevControl(){
 function paintDevChips(){
   $('dvRooms').innerHTML = Object.entries(ROOMS_UI).map(([k,l])=>`<button class="chip ${devDraft.room===k?'on':''}" onclick="devDraft.room='${k}';paintDevChips()">${l}</button>`).join('');
   $('dvTypes').innerHTML = Object.entries(DTYPES).map(([k,l])=>`<button class="chip ${devDraft.type===k?'on':''}" onclick="devDraft.type='${k}';paintDevChips()">${l}</button>`).join('');
-  const kinds = {demo:'Demo', ha:'Home Assistant', webhook:'Webhook'};
+  const kinds = {demo:'Demo', shortcut:'Skrót iPhone’a', ha:'Home Assistant', webhook:'Webhook'};
   $('dvKinds').innerHTML = Object.entries(kinds).map(([k,l])=>`<button class="chip ${devDraft.conn.kind===k?'on':''}" onclick="devDraft.conn.kind='${k}';paintDevChips()">${l}</button>`).join('');
   $('dvHA').style.display = devDraft.conn.kind==='ha' ? '' : 'none';
   $('dvWH').style.display = devDraft.conn.kind==='webhook' ? '' : 'none';
   $('dvDemo').style.display = devDraft.conn.kind==='demo' ? '' : 'none';
+  $('dvSC').style.display = devDraft.conn.kind==='shortcut' ? '' : 'none';
+  const mom = MOMENTARY.has(devDraft.type);
+  $('dvScOn').placeholder = mom ? 'Nazwa skrótu, np. Brama garażowa' : 'Skrót włączający, np. Włącz ekspres';
+  $('dvScOff').style.display = mom ? 'none' : '';
+  $('dvOff').style.display = mom ? 'none' : '';
+  $('dvOn').placeholder = mom ? 'Adres https do otwarcia' : 'Adres https do włączenia';
 }
 function devRange(v, commit){
   const d = S.devices.find(x=>x.id===ui.devId); if(!d) return;
@@ -1592,9 +1659,13 @@ function saveDev(){
   if(!name){ toast('Wpisz nazwę urządzenia'); $('dvName').focus(); return }
   const conn = {kind:devDraft.conn.kind};
   if(conn.kind==='ha'){ conn.entity = $('dvEntity').value.trim().toLowerCase(); if(!/^[a-z_]+\.[a-z0-9_]+$/.test(conn.entity)){ toast('Wpisz entity_id, np. light.salon'); $('dvEntity').focus(); return } }
-  if(conn.kind==='webhook'){ conn.onUrl = $('dvOn').value.trim(); conn.offUrl = $('dvOff').value.trim();
-    if(!/^https:\/\//i.test(conn.onUrl) || !/^https:\/\//i.test(conn.offUrl)){ toast('Podaj oba adresy https'); return } }
+  const mom = MOMENTARY.has(devDraft.type);
+  if(conn.kind==='webhook'){ conn.onUrl = $('dvOn').value.trim(); conn.offUrl = mom ? '' : $('dvOff').value.trim();
+    if(!/^https:\/\//i.test(conn.onUrl) || (!mom && !/^https:\/\//i.test(conn.offUrl))){ toast(mom?'Podaj adres https':'Podaj oba adresy https'); return } }
+  if(conn.kind==='shortcut'){ conn.shortcutOn = $('dvScOn').value.trim(); conn.shortcutOff = mom ? '' : $('dvScOff').value.trim();
+    if(!conn.shortcutOn || (!mom && !conn.shortcutOff)){ toast(mom?'Wpisz nazwę skrótu':'Wpisz oba skróty'); $('dvScOn').focus(); return } }
   const data = {name, type:devDraft.type, room:devDraft.room, conn};
+  if(mom) data.on = false;
   if(ui.devId){ const d=S.devices.find(x=>x.id===ui.devId); Object.assign(d,data); if(d.type==='light' && d.level==null) d.level=100; touch(d) }
   else S.devices.push({id:uid(), ...data, on:false, level:data.type==='light'?100:null, created:new Date().toISOString(), u:Date.now()});
   save(); render(); update3D(); closeSheet('devSheet'); toast(ui.devId?'Zapisano ✓':'Dodano urządzenie ✓');
@@ -1924,7 +1995,7 @@ function closeScan(){
 
 /* ═══ START ═══ */
 (async function init(){
-  load(); seedDevices();
+  load(); seedDevices(); seedOsiedle();
   if(!S.settings.homeIntro){ S.settings.homeIntro = true; S.settings.view = 'home' }   // po aktualizacji start na ekranie Dom
   setView(S.settings.view||'home');
   setInterval(()=>{ if(ui.view==='home' && document.visibilityState==='visible') syncHA() }, 30e3);
