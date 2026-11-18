@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#FFC83D"/>
-  <!-- pełny, zaokrąglony dom -->
-  <path d="M140 238 L256 146 L372 238 V368 H140 Z" fill="#17140F" stroke="#17140F" stroke-width="44" stroke-linejoin="round"/>
-  <!-- osoba wycięta w negatywie -->
-  <circle cx="256" cy="262" r="30" fill="#FFC83D"/>
-  <path d="M198 410 V372 C198 334 224 314 256 314 C288 314 314 334 314 372 V410 Z" fill="#FFC83D"/>
+  <rect width="512" height="512" fill="#17140F"/>
+  <path d="M140 238 L256 146 L372 238 V368 H140 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="44" stroke-linejoin="round"/>
+  <circle cx="256" cy="262" r="30" fill="#17140F"/>
+  <path d="M198 410 V372 C198 334 224 314 256 314 C288 314 314 334 314 372 V410 Z" fill="#17140F"/>
 </svg>
