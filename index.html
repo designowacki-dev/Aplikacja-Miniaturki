@@ -180,6 +180,30 @@ body.v-home .h3{display:block}
 .h3-chip{display:inline-block;padding:8px 13px;border-radius:16px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:12px;font-weight:500;color:#0E1F45}
 .h3-hint{position:absolute;right:14px;bottom:12px;font-size:11px;color:#0E1F45;opacity:.45;pointer-events:none}
 @media (prefers-color-scheme:dark){.h3-hint{color:#fff}}
+.h3-enter{position:absolute;right:12px;bottom:12px;height:40px;padding:0 16px 0 13px;border-radius:20px;background:var(--navy);color:var(--navy-t);font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;box-shadow:0 8px 20px -8px rgba(14,31,69,.6);transition:transform .2s var(--e-out)}
+.h3-enter:active{transform:scale(.95)}
+@media (prefers-color-scheme:dark){.h3-enter{background:#fff;color:#0E1F45}}
+.h3 .h3-hint{right:auto;left:14px}
+.h3-in{display:none}
+.h3.inside{position:fixed;inset:0;height:auto;margin:0;border-radius:0;z-index:40;box-shadow:none}
+.h3.inside .h3-in{display:flex}
+.h3.inside .h3-top,.h3.inside .h3-hint,.h3.inside .h3-enter{display:none}
+.h3-in-top{position:absolute;left:14px;right:14px;top:calc(12px + var(--safe-t));justify-content:space-between;align-items:center;pointer-events:none}
+.h3-in-top button{pointer-events:auto}
+.in-room{height:44px;padding:0 14px 0 18px;border-radius:22px;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#0E1F45;font-size:16px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 8px 20px -10px rgba(14,31,69,.5)}
+.in-exit{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#0E1F45;font-size:15px;box-shadow:0 8px 20px -10px rgba(14,31,69,.5)}
+.h3-in-dev{position:absolute;left:0;right:0;bottom:calc(16px + var(--safe-b));gap:8px;padding:0 14px;overflow-x:auto;scrollbar-width:none}
+.h3-in-dev::-webkit-scrollbar{display:none}
+.in-chip{flex:0 0 auto;height:52px;padding:0 16px 0 6px;border-radius:26px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#0E1F45;font-size:14px;font-weight:500;display:flex;align-items:center;gap:9px;box-shadow:0 8px 20px -10px rgba(14,31,69,.5);transition:background .25s,color .25s,transform .2s var(--e-out)}
+.in-chip:active{transform:scale(.95)}
+.in-chip > span{width:40px;height:40px;border-radius:50%;background:#EEF1F6;display:flex;align-items:center;justify-content:center}
+.in-chip.on{background:#0E1F45;color:#fff}
+.in-chip.on > span{background:#FFD38F;color:#0E1F45}
+.h3-hots{pointer-events:none}
+.h3-hot{position:absolute;left:0;top:0;width:46px;height:46px;border-radius:50%;pointer-events:auto;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#0E1F45;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,255,255,.35),0 8px 18px -8px rgba(14,31,69,.6);transition:background .25s,box-shadow .25s}
+.h3-hot svg{width:22px;height:22px}
+.h3-hot.on{background:#FFD38F;box-shadow:0 0 0 6px rgba(255,190,90,.35),0 0 26px 4px rgba(255,180,80,.55);animation:hotPulse 2s ease-in-out infinite}
+@keyframes hotPulse{50%{box-shadow:0 0 0 10px rgba(255,190,90,.12),0 0 30px 6px rgba(255,180,80,.45)}}
 .h3-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:14px}
 .spec{background:var(--s1);border-radius:24px;padding:16px 18px 6px;margin-bottom:18px;box-shadow:var(--shadow)}
 .spec-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
@@ -445,7 +469,11 @@ body.sheet-open .toast.on{transform:translate(-50%,0) scale(1)}
     <button class="ib set" onclick="openSettings()" aria-label="Ustawienia"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 
-  <section class="h3" id="home3d"><div class="h3-canvas" id="h3c"></div><div class="h3-top"><span class="h3-chip" id="h3chip"></span></div><span class="h3-hint">przeciągnij, aby obrócić</span></section>
+  <section class="h3" id="home3d"><div class="h3-canvas" id="h3c"></div><div class="h3-top"><span class="h3-chip" id="h3chip"></span></div><span class="h3-hint">przeciągnij, aby obrócić</span>
+    <button class="h3-enter" onclick="enterRoom()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l4-4-4-4M14 12H4"/></svg><span id="h3enterTxt">Wejdź</span></button>
+    <div class="h3-in h3-in-top"><button class="in-room" onclick="nextRoom()"><span id="h3inName"></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><button class="in-exit" onclick="exitRoom()" aria-label="Wyjdź z pokoju">✕</button></div>
+    <div class="h3-in h3-in-dev" id="h3inDev"></div>
+  </section>
 
   <section class="bento" id="bento"></section>
 
@@ -689,7 +717,7 @@ const GROUP_ORDER = ['pickup','out','problem','transit','pending','unknown'];
 /* ═══ STAN ═══ */
 const LS_KEY = 'parcels-v1';
 let S = {parcels:[], items:[], groceries:[], tasks:[], devices:[], deleted:{}, settings:{notify:false, auto:true, view:'home'}};
-let ui = {view:'home', homeTab:'all', devId:null, h3ready:false, shopTab:'todo', taskTab:'open', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
+let ui = {view:'home', homeTab:'all', inside:null, devId:null, h3ready:false, shopTab:'todo', taskTab:'open', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
 
 function load(){
   try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,items:d.items||[],groceries:d.groceries||[],tasks:d.tasks||[],devices:d.devices||[],deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
@@ -1090,6 +1118,7 @@ $('tabs').addEventListener('click',e=>{
 });
 function setView(v){
   if(!VIEW[v]) v = 'home';
+  if(v !== 'home' && ui.inside) exitRoom();
   document.body.classList.toggle('v-home', v==='home');
   ui.view = v; S.settings.view = v; save(false);
   document.querySelectorAll('.vw').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
@@ -1742,9 +1771,44 @@ function homeState(){
   const on = t => S.devices.some(d=>d.type===t && d.on);
   const vac = S.devices.find(d=>isVac(d) && d.cleaning);
   const isOn = id => !!(S.devices.find(d=>d.id===id)||{}).on;
-  return {rooms, coffee:on('coffee'), washer:on('washer'), tv:on('tv'), vacuum:vac?vac.cleaning.zone:null, lamp:isOn('dev-lampka'), counterLight:isOn('dev-kuchnia-light'), selected:ui.homeTab!=='all'?ui.homeTab:null};
+  const devOn = Object.fromEntries(S.devices.map(d=>[d.id, devActive(d)]));
+  return {rooms, devOn, coffee:on('coffee'), washer:on('washer'), tv:on('tv'), vacuum:vac?vac.cleaning.zone:null, lamp:isOn('dev-lampka'), counterLight:isOn('dev-kuchnia-light'), selected:ui.homeTab!=='all'?ui.homeTab:null};
+}
+/* ═══ WEJŚCIE DO POKOJU ═══ */
+const ROOMS3D = ['salon','sypialnia','lazienka','przedpokoj'];
+const roomDevs = room => S.devices.filter(d=>d.room===room && !isMom(d));
+const devActive = d => isVac(d) ? !!d.cleaning : !!d.on;
+function enterRoom(room){
+  room = room || (ROOMS3D.includes(ui.homeTab) ? ui.homeTab : 'salon');
+  if(!window.Home3D || !ui.h3ready) return;
+  const ok = Home3D.enter(room, roomDevs(room).map(d=>({id:d.id, type:d.type, html:DI[d.type]||DI.other})), tapDevice);
+  if(!ok) return;
+  ui.inside = room;
+  $('home3d').classList.add('inside'); document.body.style.overflow = 'hidden';
+  $('h3inName').textContent = ROOMS_UI[room];
+  if(navigator.vibrate) navigator.vibrate(10);
+  paintInside(); update3D();
+}
+function exitRoom(){
+  if(!ui.inside) return;
+  ui.inside = null; $('home3d').classList.remove('inside');
+  if(!document.querySelector('.sw.on')) document.body.style.overflow = '';
+  Home3D.exit(); update3D();
+}
+function nextRoom(){ const i = ROOMS3D.indexOf(ui.inside); enterRoom(ROOMS3D[(i+1) % ROOMS3D.length]) }
+function tapDevice(id){
+  const d = S.devices.find(x=>x.id===id); if(!d) return;
+  if(isVac(d)) openDev(id); else toggleDevice(id);
+}
+function paintInside(){
+  if(!ui.inside) return;
+  const html = roomDevs(ui.inside).map(d=>`<button class="in-chip ${devActive(d)?'on':''}" onclick="tapDevice('${d.id}')"><span>${devIcon(d)}</span>${esc(d.name)}</button>`).join('');
+  if($('h3inDev').innerHTML !== html) $('h3inDev').innerHTML = html;
 }
 function update3D(){
+  if(ui.inside) paintInside();
+  const er = ROOMS3D.includes(ui.homeTab) ? ui.homeTab : null;
+  const et = $('h3enterTxt'); if(et) et.textContent = er ? `Wejdź · ${ROOMS_UI[er]}` : 'Wejdź';
   const on = S.devices.filter(d=>d.on).length;
   const chip = $('h3chip'); if(chip) chip.textContent = on ? `${on} ${plural(on,'urządzenie włączone','urządzenia włączone','urządzeń włączonych')}` : 'Wszystko wyłączone';
   if(window.Home3D && ui.h3ready) Home3D.update(homeState());
@@ -1940,8 +2004,8 @@ function delDev(){
 
 /* ═══ ARKUSZE ═══ */
 function openSheet(id){ $(id).classList.add('on'); document.body.style.overflow='hidden'; document.body.classList.add('sheet-open') }
-function closeSheet(id){ $(id).classList.remove('on'); if(!document.querySelector('.sw.on')){ document.body.style.overflow=''; document.body.classList.remove('sheet-open') } }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ const o=[...document.querySelectorAll('.sw.on')].pop(); if(o){ o.id==='scanSheet'?closeScan():closeSheet(o.id) } } });
+function closeSheet(id){ $(id).classList.remove('on'); if(!document.querySelector('.sw.on')){ document.body.style.overflow = ui.inside ? 'hidden' : ''; document.body.classList.remove('sheet-open') } }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && ui.inside && !document.querySelector('.sw.on')){ exitRoom(); return } if(e.key==='Escape'){ const o=[...document.querySelectorAll('.sw.on')].pop(); if(o){ o.id==='scanSheet'?closeScan():closeSheet(o.id) } } });
 
 /* ═══ DODAWANIE / EDYCJA ═══ */
 function renderCarrierChips(){
