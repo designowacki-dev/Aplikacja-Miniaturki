@@ -74,9 +74,13 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 
 /* bento */
 .bento{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(104px,auto);gap:12px;margin:6px 0 18px}
-.tile{--tc:var(--t2);position:relative;background:var(--s1);color:var(--t1);border-radius:26px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;min-width:0;overflow:hidden;box-shadow:var(--shadow);transition:transform .25s var(--e-out);animation:tileIn .45s var(--e-out) both}
+.tile{--tc:var(--t2);position:relative;background:var(--s1);color:var(--t1);border-radius:26px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;min-width:0;overflow:hidden;box-shadow:var(--shadow);transition:transform .25s var(--e-out)}
 .tile:active{transform:scale(.97)}
 @keyframes tileIn{from{opacity:0;transform:scale(.97)}}
+.anim .hero{animation:tileIn .45s var(--e-out) both}
+.anim .ovw{animation:tileIn .45s var(--e-out) .05s both}
+.anim .qa{animation:tileIn .45s var(--e-out) .1s both}
+.anim .card{animation:cardIn .4s var(--e-out) both}
 .tile.big{grid-row:span 2;background:var(--navy);color:var(--navy-t)}
 .bento .tile:nth-child(2){background:var(--sky);color:var(--sky-t)}
 .tile.wide{grid-column:span 2;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;min-height:76px;background:var(--sky);color:var(--sky-t)}
@@ -101,7 +105,7 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 
 /* bento jak ekran startowy wzoru */
 .bento{display:flex;flex-direction:column;gap:12px;margin:6px 0 18px}
-.hero{position:relative;overflow:hidden;background:var(--navy);color:var(--navy-t);border-radius:26px;padding:18px 20px 20px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:156px;box-shadow:var(--shadow);transition:transform .25s var(--e-out);animation:tileIn .45s var(--e-out) both}
+.hero{position:relative;overflow:hidden;background:var(--navy);color:var(--navy-t);border-radius:26px;padding:18px 20px 20px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:156px;box-shadow:var(--shadow);transition:transform .25s var(--e-out)}
 .hero:active{transform:scale(.98)}
 .h-art{position:absolute;right:-8px;top:50%;transform:translateY(-50%) rotate(-8deg);width:138px;height:138px;opacity:.16;pointer-events:none}
 .h-art svg{width:100%;height:100%}
@@ -111,7 +115,7 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 .h-d{font-size:13px;color:var(--navy-t2);max-width:66%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;first-letter:uppercase}
 .h-d::first-letter{text-transform:uppercase}
 .h-t{font-size:15px;font-weight:500;margin-top:3px;max-width:66%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ovw{background:var(--sky);color:var(--sky-t);border-radius:26px;padding:16px 18px 14px;box-shadow:var(--shadow);animation:tileIn .45s var(--e-out) .05s both}
+.ovw{background:var(--sky);color:var(--sky-t);border-radius:26px;padding:16px 18px 14px;box-shadow:var(--shadow)}
 .ovw-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .ovw-h b{font-size:15px;font-weight:500}
 .ovw-m{display:grid;grid-template-columns:repeat(3,1fr)}
@@ -122,7 +126,7 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 .met-f{display:flex;justify-content:space-between;align-items:center;gap:4px}
 .met-f small{font-size:11px;opacity:.55;white-space:nowrap}
 .met-f i{display:flex}
-.qa{background:var(--s1);border-radius:26px;padding:16px 16px 18px;box-shadow:var(--shadow);animation:tileIn .45s var(--e-out) .1s both}
+.qa{background:var(--s1);border-radius:26px;padding:16px 16px 18px;box-shadow:var(--shadow)}
 .qa-h{font-size:15px;font-weight:500;margin:0 2px 14px}
 .qa-g{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .qa-b{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;color:var(--t1);text-align:center;transition:transform .2s var(--e-out)}
@@ -160,7 +164,7 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 .grp-h{font-size:17px;font-weight:600;color:var(--t1);margin:0 6px 10px;display:flex;align-items:center;gap:8px}
 .grp-h i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .grp-sum{margin-left:auto;color:var(--t2);font-weight:400;font-size:14px}
-.card{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:22px;background:var(--s1);margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow);transition:transform .25s var(--e-out);animation:cardIn .4s var(--e-out) both}
+.card{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:22px;background:var(--s1);margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow);transition:transform .25s var(--e-out)}
 .card:active{transform:scale(.98)}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px)}}
 .cb{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.2px;position:relative}
@@ -679,7 +683,9 @@ function cardHtml(p, i){
     ${etaHtml(p)}
   </div>`;
 }
-function setCnt(id, n){ const el=$(id); if(el) el.textContent = n?n:'' }
+function setCnt(id, n){ const el=$(id); if(el){ const v=n?String(n):''; if(el.textContent!==v) el.textContent=v } }
+const bentoBuf = document.createElement('div'), listBuf = document.createElement('div');
+function syncDom(live, buf){ if(live.innerHTML!==buf.innerHTML) live.innerHTML = buf.innerHTML }
 function render(){
   setCnt('vc-parcels', S.parcels.filter(p=>inTab(p,'active')).length);
   setCnt('vc-shop', S.items.filter(it=>!it.bought).length);
@@ -687,6 +693,7 @@ function render(){
   setCnt('vc-tasks', S.tasks.filter(t=>!t.done).length);
   if(ui.view==='shop') renderShop(); else if(ui.view==='groc') renderGroc(); else if(ui.view==='tasks') renderTasks(); else renderParcels();
   renderBento();
+  syncDom($('bento'), bentoBuf); syncDom($('list'), listBuf);
 }
 
 /* ═══ BENTO ═══ */
@@ -762,7 +769,7 @@ const shortPLN = n => n>=10000 ? (Math.round(n/100)/10).toString().replace('.','
 function monthStart(){ const m=new Date(); m.setDate(1); m.setHours(0,0,0,0); return m }
 
 function renderBento(){
-  const B = $('bento');
+  const B = bentoBuf;
   if(ui.view==='shop'){
     const todo = S.items.filter(it=>!it.bought);
     const high = todo.filter(it=>(it.prio||'mid')==='high');
@@ -872,7 +879,7 @@ function renderParcels(){
   let items = all.filter(p=>inTab(p,ui.tab));
   if(q) items = items.filter(p=>(p.name||'').toLowerCase().includes(q)||p.number.toLowerCase().includes(q)||(p.note||'').toLowerCase().includes(q)||(CARRIERS[p.carrier]?.name||'').toLowerCase().includes(q));
 
-  const L = $('list');
+  const L = listBuf;
   if(!items.length){
     const msg = q ? ['Nic nie znaleziono','Spróbuj innej nazwy albo numeru.'] :
       ui.tab==='active' ? ['Brak aktywnych przesyłek','Dodaj numer przesyłki, a aplikacja rozpozna przewoźnika i będzie pilnować statusu.'] :
@@ -941,6 +948,8 @@ function setView(v){
   $('fabTxt').textContent = VIEW[v].fab;
   $('refreshAll').style.display = 'none';
   ui.q=''; $('q').value='';
+  document.body.classList.add('anim'); clearTimeout(setView._t);
+  setView._t = setTimeout(()=>document.body.classList.remove('anim'), 900);
   renderTabs(); render(); moveInd();
   window.scrollTo({top:0}); setTimeout(fabVis, 50);
 }
@@ -1000,7 +1009,7 @@ function renderShop(){
   setCnt('cnt-todo', todo.length); setCnt('cnt-bought', bought.length);
   let list = ui.shopTab==='bought' ? bought : todo;
   if(q) list = list.filter(it=>(it.name||'').toLowerCase().includes(q)||(it.url||'').toLowerCase().includes(q)||(it.note||'').toLowerCase().includes(q));
-  const L = $('list');
+  const L = listBuf;
   if(!list.length){
     const msg = q ? ['Nic nie znaleziono','Spróbuj innej nazwy.'] :
       ui.shopTab==='bought' ? ['Nic jeszcze nie kupiono','Zaznacz kółko przy rzeczy, żeby oznaczyć ją jako kupioną.'] :
@@ -1127,7 +1136,7 @@ function renderGroc(){
   let all = S.groceries;
   if(q) all = all.filter(g=>(g.name||'').toLowerCase().includes(q)||(g.qty||'').toLowerCase().includes(q));
   const todo = all.filter(g=>!g.done), done = all.filter(g=>g.done);
-  const L = $('list');
+  const L = listBuf;
   if(!todo.length && !done.length){
     L.innerHTML = `<div class="empty"><div class="em-ic" style="font-size:36px">🛒</div><h2>${q?'Nic nie znaleziono':'Lista zakupów jest pusta'}</h2><p>${q?'Spróbuj innej nazwy.':'Dodaj produkty, a aplikacja sama przypisze kategorię: warzywa, owoce, pieczywo, chemię…'}</p></div>`;
     return;
@@ -1235,7 +1244,7 @@ function renderTasks(){
   let all = S.tasks;
   setCnt('cnt-open', all.filter(t=>!t.done).length); setCnt('cnt-done', all.filter(t=>t.done).length);
   if(q) all = all.filter(t=>(t.title||'').toLowerCase().includes(q)||(t.desc||'').toLowerCase().includes(q));
-  const L = $('list');
+  const L = listBuf;
   const list = all.filter(t=>ui.taskTab==='done'?t.done:!t.done);
   if(!list.length){
     const m = q?['Nic nie znaleziono','Spróbuj innej nazwy.']:ui.taskTab==='done'?['Nic jeszcze nie zrobiono','Odhaczone zadania pojawią się tutaj.']:['Brak zadań','Dodaj zadanie: nazwę, opis i termin.'];
