@@ -193,6 +193,23 @@ body.v-home .h3{display:block}
 .dev.mom.opened{background:#DDF5E7;color:#0E1F45}
 .dev.mom.opened .dev-ic{background:#22A06B;color:#fff}
 @media (prefers-color-scheme:dark){.dev.mom.opened{background:#16402D;color:#fff}}
+.dev.vac{grid-column:span 2;min-height:0;justify-content:flex-start;padding:14px 16px 16px}
+.vac-top{display:flex;align-items:center;gap:12px;padding-right:0}
+.vac-top .dev-ic{position:static;flex-shrink:0}
+.vac-top .vac-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.vac-l{font-size:12px;opacity:.6;margin:14px 2px 8px}
+.vac-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vac-b{height:44px;border-radius:22px;background:var(--bg);color:var(--t1);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .25s,color .25s,transform .2s var(--e-out)}
+.vac-b:active{transform:scale(.95)}
+.dev.on .vac-b{background:var(--navy-f);color:var(--navy-t)}
+.vac-b.run{background:#FFD38F!important;color:#0E1F45!important}
+.vac-b.run::before{content:'';width:8px;height:8px;border-radius:50%;background:#0E1F45;animation:rays .8s ease-in-out infinite alternate}
+.vac-stop{height:34px;padding:0 14px;border-radius:17px;background:var(--navy-f);color:inherit;font-size:13px;font-weight:500;flex-shrink:0}
+.dc .vac-btns{margin-top:16px}
+.dc:not(.on) .vac-b{background:var(--bg)}
+.an-brush{transform-box:view-box;transform-origin:12px 12px;animation:spin 1.4s linear infinite}
+.an-vac{animation:vacmove 2.4s ease-in-out infinite}
+@keyframes vacmove{0%,100%{transform:translateX(-1px)}50%{transform:translateX(1px)}}
 .dev-n{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dev-s{font-size:13px;opacity:.6;margin-top:2px}
 .tgl{position:absolute;top:18px;right:14px;width:48px;height:28px;border-radius:14px;background:var(--s3);transition:background .25s}
@@ -441,6 +458,7 @@ body.sheet-open .toast.on{transform:translate(-50%,0) scale(1)}
     <div class="sh-h"><div><h2 id="dvTitle">Urządzenie</h2><p class="sub-h" id="dvRoomSub" style="margin:2px 0 0"></p></div><button class="ib" onclick="closeSheet('devSheet')" aria-label="Zamknij">✕</button></div>
     <div class="dc" id="dvControl">
       <div class="dc-top"><span class="dc-ic" id="dvIc"></span><span class="dc-st" id="dvState"></span><button class="tgl" id="dvTgl" onclick="toggleDevice(ui.devId)" aria-label="Włącz / wyłącz"><i></i></button><button class="open-b big" id="dvOpen" onclick="openDevice(ui.devId)">Otwórz</button></div>
+      <div id="dvVacBtns"></div>
       <div class="dc-range" id="dvRangeW"><input type="range" id="dvRange" min="1" max="100" oninput="devRange(this.value)" onchange="devRange(this.value,true)"><b id="dvPct"></b></div>
     </div>
     <div class="fg"><label class="fl" for="dvName">Nazwa</label><input class="in" id="dvName" placeholder="np. Światło w salonie" autocomplete="off"></div>
@@ -449,6 +467,13 @@ body.sheet-open .toast.on{transform:translate(-50%,0) scale(1)}
     <div class="fg"><label class="fl">Sterowanie</label><div class="chips" id="dvKinds"></div>
       <p class="small-note" id="dvDemo">Tryb demo: przełącznik działa w aplikacji i synchronizuje się między telefonami, ale nie steruje prawdziwym urządzeniem.</p>
       <div id="dvHA" style="margin-top:10px"><input class="in mono" id="dvEntity" placeholder="entity_id, np. light.salon" autocomplete="off" autocapitalize="off" spellcheck="false"><p class="small-note">Nazwa encji z Home Assistant (Ustawienia → Encje). Wymaga zmiennych HA_URL i HA_TOKEN w Vercelu.</p></div>
+      <div id="dvVac" style="margin-top:10px">
+        <input class="in" id="dvVz-salon" placeholder="Salon" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <input class="in" id="dvVz-kuchnia" placeholder="Kuchnia" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:8px">
+        <input class="in" id="dvVz-sypialnia" placeholder="Sypialnia" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:8px">
+        <input class="in" id="dvVz-dock" placeholder="Powrót do bazy" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-top:8px">
+        <p class="small-note" id="dvVacNote"></p>
+      </div>
       <div id="dvSC" style="margin-top:10px"><input class="in" id="dvScOn" placeholder="Nazwa skrótu" autocomplete="off"><input class="in" id="dvScOff" placeholder="Skrót wyłączający" autocomplete="off" style="margin-top:8px"><p class="small-note">W aplikacji urządzenia (np. Blue Bolt) użyj „Dodaj do Siri” i nadaj skrótowi dokładnie tę nazwę. Przycisk uruchomi go przez aplikację Skróty.</p></div>
       <div id="dvWH" style="margin-top:10px"><input class="in" id="dvOn" type="url" placeholder="Adres https do włączenia" autocomplete="off" autocapitalize="off"><input class="in" id="dvOff" type="url" placeholder="Adres https do wyłączenia" autocomplete="off" autocapitalize="off" style="margin-top:8px"><p class="small-note">Np. webhook z IFTTT, Shelly Cloud albo Tuya.</p></div>
     </div>
@@ -789,6 +814,7 @@ function setCnt(id, n){ const el=$(id); if(el){ const v=n?String(n):''; if(el.te
 const bentoBuf = document.createElement('div'), listBuf = document.createElement('div');
 function syncDom(live, buf){ if(live.innerHTML!==buf.innerHTML) live.innerHTML = buf.innerHTML }
 function render(){
+  tickDevices();
   setCnt('vc-parcels', S.parcels.filter(p=>inTab(p,'active')).length);
   setCnt('vc-shop', S.items.filter(it=>!it.bought).length);
   setCnt('vc-groc', S.groceries.filter(g=>!g.done).length);
@@ -1429,6 +1455,7 @@ const DI = {
   tv:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8"/></svg>',
   ac:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 6l2.5-1.5M9.5 19.5 12 18l2.5 1.5"/></svg>',
   other:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>',
+  vacuum:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="7.6" r=".7" fill="currentColor" stroke="none"/></svg>',
   washer:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M4 6.5h16"/><circle cx="12" cy="14" r="5"/></svg>',
   gate:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"/><path d="M6 21v-9h12v9M6 15h12M6 18h12"/></svg>',
   lift:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M12 3v18M8.5 9 10 7.5 11.5 9M12.5 15l1.5 1.5 1.5-1.5"/></svg>',
@@ -1442,8 +1469,9 @@ const DI_ON = {
   light:'<svg class="an" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><g class="an-rays"><path d="M12 .8v1.4M3.5 4.3l1 1M20.5 4.3l-1 1M1 11h1.4M21.6 11h1.4"/></g><path d="M9 18h6M10 21h4M12 4a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V17h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 4z"/></svg>',
   ac:'<svg class="an" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><g class="an-fan"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></g><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>',
 };
+DI_ON.vacuum = '<svg class="an an-vac" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><g class="an-brush"><path d="M12 3.8v2.4M19.1 15.6l-2-1.2M4.9 15.6l2-1.2" stroke-width="1.5"/></g><circle cx="12" cy="7.6" r=".7" fill="currentColor" stroke="none"/></svg>';
 const devIcon = d => (d.on && DI_ON[d.type]) || DI[d.type] || DI.other;
-const DTYPES = {light:'Światło', coffee:'Ekspres', washer:'Pralka', plug:'Gniazdko', tv:'Telewizor', ac:'Klimatyzacja', gate:'Brama', lift:'Winda', barrier:'Szlaban', door:'Drzwi', other:'Inne'};
+const DTYPES = {light:'Światło', coffee:'Ekspres', washer:'Pralka', vacuum:'Odkurzacz', plug:'Gniazdko', tv:'Telewizor', ac:'Klimatyzacja', gate:'Brama', lift:'Winda', barrier:'Szlaban', door:'Drzwi', other:'Inne'};
 // urządzenia „na impuls” — mają przycisk Otwórz zamiast przełącznika
 const MOMENTARY = new Set(['gate','lift','barrier','door']);
 const isMom = d => MOMENTARY.has(d.type);
@@ -1487,7 +1515,69 @@ const SCENES = [
   {id:'night', name:'Noc', icon:MOON, f:d=> d.id==='dev-lampka'?{on:true,level:10} : (d.type==='light'||d.type==='tv'||d.type==='coffee')?{on:false}:null},
   {id:'away', name:'Wychodzę', icon:DOOR, f:d=> d.type==='plug'?null:{on:false}},
 ];
+/* ═══ ODKURZACZ ═══ */
+const VAC_ZONES = {
+  salon:{label:'Salon', acc:'salon', min:20},
+  kuchnia:{label:'Kuchnia', acc:'kuchnię', min:8},
+  sypialnia:{label:'Sypialnia', acc:'sypialnię', min:14},
+};
+const VAC_DEFAULT_SC = {salon:'Odkurzaj salon', kuchnia:'Odkurzaj kuchnię', sypialnia:'Odkurzaj sypialnię', dock:'Odkurzacz do bazy'};
+function seedVacuum(){
+  if(S.settings.vacSeeded) return;
+  if(!S.devices.some(d=>d.id==='dev-odkurzacz') && !S.deleted['dev-odkurzacz'])
+    S.devices.push({id:'dev-odkurzacz', name:'Robot sprzątający', type:'vacuum', room:'przedpokoj', on:false, level:null, cleaning:null, conn:{kind:'demo', zones:{...VAC_DEFAULT_SC}}, created:new Date(0).toISOString(), u:1});
+  S.settings.vacSeeded = true;
+}
+const isVac = d => d.type==='vacuum';
+// zakończ sprzątanie, którego czas minął
+function tickDevices(){
+  let ch = false;
+  for(const d of S.devices) if(isVac(d) && d.cleaning && Date.now() > new Date(d.cleaning.endsAt)){ d.cleaning = null; d.on = false; touch(d); ch = true }
+  if(ch) save();
+}
+function vacButtons(d){
+  const z = d.cleaning && d.cleaning.zone;
+  return `<div class="vac-btns">${Object.entries(VAC_ZONES).map(([k,v])=>`<button class="vac-b ${z===k?'run':''}" onclick="event.stopPropagation();startClean('${d.id}','${k}')">${v.label}</button>`).join('')}</div>`;
+}
+async function vacSend(d, target, isDock){
+  const kind = (d.conn&&d.conn.kind)||'demo', z = (d.conn&&d.conn.zones)||{};
+  if(kind==='demo') return true;
+  if(kind==='shortcut'){ if(z[target]) goShortcut(z[target]); return true }
+  const conn = kind==='ha' ? {kind, entity:z[target]} : {kind, onUrl:z[target]};
+  if(!z[target]){ toast('Ustaw sterowanie dla tej akcji w ustawieniach odkurzacza'); return false }
+  try{
+    const r = await fetch('/api/device',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:isDock?'dock':'open', conn})});
+    if(r.status===401){ location.reload(); return false }
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || j.error) throw new Error(j.error||('HTTP '+r.status));
+    return true;
+  }catch(e){ toast(`${d.name}: ${e.message||'błąd połączenia'}`); return false }
+}
+async function startClean(id, zone){
+  const d = S.devices.find(x=>x.id===id); if(!d) return;
+  if(d.cleaning && d.cleaning.zone===zone){ stopClean(id); return }
+  if(navigator.vibrate) navigator.vibrate(15);
+  const prev = d.cleaning, now = Date.now();
+  d.cleaning = {zone, startedAt:new Date(now).toISOString(), endsAt:new Date(now + VAC_ZONES[zone].min*60000).toISOString()};
+  d.on = true; touch(d); save(); render(); update3D();
+  if(ui.devId===d.id && $('devSheet').classList.contains('on')) paintDevControl();
+  toast(`Odkurzam ${VAC_ZONES[zone].acc}`);
+  if(!(await vacSend(d, zone))){ d.cleaning = prev; d.on = !!prev; touch(d); save(); render(); update3D() }
+}
+async function stopClean(id){
+  const d = S.devices.find(x=>x.id===id); if(!d || !d.cleaning) return;
+  d.cleaning = null; d.on = false; touch(d); save(); render(); update3D();
+  if(ui.devId===d.id && $('devSheet').classList.contains('on')) paintDevControl();
+  toast('Wraca do bazy');
+  vacSend(d, 'dock', true);
+}
+
 function devStatus(d){
+  if(isVac(d)){
+    if(!d.cleaning) return 'W bazie · gotowy';
+    const left = Math.max(1, Math.ceil((new Date(d.cleaning.endsAt) - Date.now())/60000));
+    return `Odkurza ${VAC_ZONES[d.cleaning.zone].acc} · ${left} min`;
+  }
   if(isMom(d)) return d.lastOpen ? `Otwarto ${fmtDate(d.lastOpen)}` : (d.conn&&d.conn.kind==='shortcut' ? 'Skrót iPhone’a' : 'Gotowe');
   if(!d.on) return 'Wyłączone';
   if(d.type==='light' && d.level!=null) return `Włączone · ${d.level}%`;
@@ -1498,6 +1588,11 @@ function devStatus(d){
   return 'Włączone';
 }
 function devTile(d, i){
+  if(isVac(d)) return `<div class="dev vac ${d.cleaning?'on':''}" onclick="openDev('${d.id}')">
+    <div class="vac-top"><span class="dev-ic">${devIcon(d)}</span><span class="vac-t"><span class="dev-n">${esc(d.name)}</span><span class="dev-s">${esc(devStatus(d))}</span></span>
+      ${d.cleaning?`<button class="vac-stop" onclick="event.stopPropagation();stopClean('${d.id}')">Do bazy</button>`:''}</div>
+    <div class="vac-l">Odkurzaj</div>${vacButtons(d)}
+  </div>`;
   if(isMom(d)) return `<div class="dev mom t-${d.type}" id="dt-${d.id}" onclick="openDev('${d.id}')">
     <span class="dev-ic">${DI[d.type]||DI.other}</span>
     <button class="open-b" onclick="event.stopPropagation();openDevice('${d.id}')">Otwórz</button>
@@ -1549,7 +1644,8 @@ function homeState(){
     rooms[k] = {on:onL.length>0, level:onL.length?Math.max(...onL.map(d=>d.level??100)):0, label:ROOMS_UI[k]};
   }
   const on = t => S.devices.some(d=>d.type===t && d.on);
-  return {rooms, coffee:on('coffee'), washer:on('washer'), tv:on('tv'), selected:ui.homeTab!=='all'?ui.homeTab:null};
+  const vac = S.devices.find(d=>isVac(d) && d.cleaning);
+  return {rooms, coffee:on('coffee'), washer:on('washer'), tv:on('tv'), vacuum:vac?vac.cleaning.zone:null, selected:ui.homeTab!=='all'?ui.homeTab:null};
 }
 function update3D(){
   const on = S.devices.filter(d=>d.on).length;
@@ -1629,7 +1725,7 @@ function toggleDevice(id){
 async function applyScene(id){
   const sc = SCENES.find(s=>s.id===id); if(!sc) return;
   const jobs = [];
-  for(const d of S.devices){ if(isMom(d)) continue; const p = sc.f(d); if(p && (p.on!==d.on || (p.level!=null && p.level!==d.level))) jobs.push(setDevice(d, p, true)) }
+  for(const d of S.devices){ if(isMom(d) || isVac(d)) continue; const p = sc.f(d); if(p && (p.on!==d.on || (p.level!=null && p.level!==d.level))) jobs.push(setDevice(d, p, true)) }
   toast(`Scena: ${sc.name}`);
   const res = await Promise.all(jobs);
   if(res.includes(false)) toast('Część urządzeń nie odpowiedziała');
@@ -1660,6 +1756,8 @@ function openDevSheet(d){
   $('dvName').value = devDraft.name;
   $('dvEntity').value = devDraft.conn.entity||''; $('dvOn').value = devDraft.conn.onUrl||''; $('dvOff').value = devDraft.conn.offUrl||'';
   $('dvScOn').value = devDraft.conn.shortcutOn||''; $('dvScOff').value = devDraft.conn.shortcutOff||'';
+  const vz = devDraft.conn.zones || {};
+  for(const k of ['salon','kuchnia','sypialnia','dock']) $('dvVz-'+k).value = vz[k]||'';
   $('dvSave').textContent = d ? 'Zapisz ustawienia' : 'Dodaj urządzenie';
   $('dvDel').style.display = d ? '' : 'none';
   paintDevChips(); if(d) paintDevControl();
@@ -1673,7 +1771,9 @@ function paintDevControl(){
   $('dvIc').innerHTML = devIcon(d);
   $('dvState').textContent = devStatus(d);
   $('dvTgl').classList.toggle('on', !!d.on);
-  $('dvTgl').style.display = isMom(d) ? 'none' : '';
+  $('dvTgl').style.display = (isMom(d) || isVac(d)) ? 'none' : '';
+  c.classList.toggle('on', isVac(d) ? !!d.cleaning : !!d.on);
+  $('dvVacBtns').innerHTML = isVac(d) ? vacButtons(d) + (d.cleaning?`<button class="btn btn-s" style="margin-top:10px;height:46px" onclick="stopClean('${d.id}')">Wróć do bazy</button>`:'') : '';
   $('dvOpen').style.display = isMom(d) ? '' : 'none';
   const showR = d.type==='light';
   $('dvRangeW').style.display = showR ? '' : 'none';
@@ -1688,6 +1788,18 @@ function paintDevChips(){
   $('dvWH').style.display = devDraft.conn.kind==='webhook' ? '' : 'none';
   $('dvDemo').style.display = devDraft.conn.kind==='demo' ? '' : 'none';
   $('dvSC').style.display = devDraft.conn.kind==='shortcut' ? '' : 'none';
+  const vac = devDraft.type==='vacuum', kind = devDraft.conn.kind;
+  $('dvVac').style.display = vac && kind!=='demo' ? '' : 'none';
+  if(vac){
+    $('dvSC').style.display = 'none'; $('dvHA').style.display = 'none'; $('dvWH').style.display = 'none';
+    if(kind==='shortcut') for(const k of ['salon','kuchnia','sypialnia','dock']) if(!$('dvVz-'+k).value) $('dvVz-'+k).value = VAC_DEFAULT_SC[k];
+    const ph = {shortcut:'Nazwa skrótu', ha:'Encja HA, np. script.odkurzaj_salon', webhook:'Adres https'}[kind] || '';
+    [['salon','Salon'],['kuchnia','Kuchnia'],['sypialnia','Sypialnia'],['dock','Powrót do bazy']].forEach(([k,l])=>$('dvVz-'+k).placeholder = `${l} — ${ph}`);
+    $('dvVacNote').textContent = {
+      shortcut:'W aplikacji odkurzacza (np. Roborock, Xiaomi, Dreame) dodaj skróty do Siri dla sprzątania pokoi i nadaj im te nazwy.',
+      ha:'Np. skrypty w Home Assistant sprzątające dany pokój; powrót do bazy: encja vacuum.… odkurzacza.',
+      webhook:'Adresy https wywoływane dla każdej akcji.'}[kind] || '';
+  }
   const mom = MOMENTARY.has(devDraft.type);
   $('dvScOn').placeholder = mom ? 'Nazwa skrótu, np. Brama garażowa' : 'Skrót włączający, np. Włącz ekspres';
   $('dvScOff').style.display = mom ? 'none' : '';
@@ -1703,11 +1815,17 @@ function saveDev(){
   const name = $('dvName').value.trim();
   if(!name){ toast('Wpisz nazwę urządzenia'); $('dvName').focus(); return }
   const conn = {kind:devDraft.conn.kind};
-  if(conn.kind==='ha'){ conn.entity = $('dvEntity').value.trim().toLowerCase(); if(!/^[a-z_]+\.[a-z0-9_]+$/.test(conn.entity)){ toast('Wpisz entity_id, np. light.salon'); $('dvEntity').focus(); return } }
+  if(conn.kind==='ha' && devDraft.type!=='vacuum'){ conn.entity = $('dvEntity').value.trim().toLowerCase(); if(!/^[a-z_]+\.[a-z0-9_]+$/.test(conn.entity)){ toast('Wpisz entity_id, np. light.salon'); $('dvEntity').focus(); return } }
   const mom = MOMENTARY.has(devDraft.type);
-  if(conn.kind==='webhook'){ conn.onUrl = $('dvOn').value.trim(); conn.offUrl = mom ? '' : $('dvOff').value.trim();
+  if(devDraft.type==='vacuum'){
+    conn.zones = {};
+    for(const k of ['salon','kuchnia','sypialnia','dock']) conn.zones[k] = $('dvVz-'+k).value.trim();
+    if(conn.kind==='ha' && Object.values(conn.zones).some(v=>v && !/^[a-z_]+\.[a-z0-9_]+$/.test(v))){ toast('Encje w formacie np. script.odkurzaj_salon'); return }
+    if(conn.kind==='webhook' && Object.values(conn.zones).some(v=>v && !/^https:\/\//i.test(v))){ toast('Adresy muszą zaczynać się od https://'); return }
+    delete conn.entity;
+  } else if(conn.kind==='webhook'){ conn.onUrl = $('dvOn').value.trim(); conn.offUrl = mom ? '' : $('dvOff').value.trim();
     if(!/^https:\/\//i.test(conn.onUrl) || (!mom && !/^https:\/\//i.test(conn.offUrl))){ toast(mom?'Podaj adres https':'Podaj oba adresy https'); return } }
-  if(conn.kind==='shortcut'){ conn.shortcutOn = $('dvScOn').value.trim(); conn.shortcutOff = mom ? '' : $('dvScOff').value.trim();
+  if(conn.kind==='shortcut' && devDraft.type!=='vacuum'){ conn.shortcutOn = $('dvScOn').value.trim(); conn.shortcutOff = mom ? '' : $('dvScOff').value.trim();
     if(!conn.shortcutOn || (!mom && !conn.shortcutOff)){ toast(mom?'Wpisz nazwę skrótu':'Wpisz oba skróty'); $('dvScOn').focus(); return } }
   const data = {name, type:devDraft.type, room:devDraft.room, conn};
   if(mom) data.on = false;
@@ -2040,7 +2158,7 @@ function closeScan(){
 
 /* ═══ START ═══ */
 (async function init(){
-  load(); seedDevices(); seedOsiedle(); migrateDevices();
+  load(); seedDevices(); seedOsiedle(); migrateDevices(); seedVacuum();
   if(!S.settings.homeIntro){ S.settings.homeIntro = true; S.settings.view = 'home' }   // po aktualizacji start na ekranie Dom
   setView(S.settings.view||'home');
   setInterval(()=>{ if(ui.view==='home' && document.visibilityState==='visible') syncHA() }, 30e3);

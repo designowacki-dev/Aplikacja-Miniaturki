@@ -10,15 +10,18 @@
   const WALLS = [
     [80,128,1055,155],[80,128,125,255],[80,460,125,600],[80,765,125,888],[80,840,1055,888],
     [1030,128,1055,520],[1030,635,1055,888],
+  ];
+  const INNER = [   // ściany działowe — niższe, żeby było widać, co dzieje się w pokojach
     [125,515,715,527],[665,645,685,840],[665,645,795,660],[890,645,1030,660],
     [835,420,1030,432],[835,420,847,500],
   ];
+  const INNER_H = .62;
   const WINDOWS = [[80,255,125,460],[80,600,125,765]];
   const ROOMS = {
     salon:     {rects:[[125,155,1030,420],[125,420,715,515]], color:'#e7d9c4', light:[560,300]},
     sypialnia: {rects:[[125,527,665,840],[665,527,715,645]],  color:'#ecdfcc', light:[400,690]},
     lazienka:  {rects:[[685,660,1030,840]],                   color:'#e3e6ea', light:[860,750]},
-    przedpokoj:{rects:[[715,420,1030,645]],                   color:'#dcdad6', light:[900,560]},
+    przedpokoj:{rects:[[715,420,1030,645]],                   color:'#dcdad6', light:[800,575]},
   };
   const FURN = [
     [665,155,960,222,.9,'#efebe4'],[960,225,1030,415,.9,'#efebe4'],
@@ -29,9 +32,18 @@
     [895,765,935,832,.45,'#fafafa'],[847,432,1030,500,.95,'#e6e0d6'],
   ];
   const DEVICE_SPOTS = { coffee:[892,175,.9] };   // ekspres na blacie
+  // odkurzacz: stacja w przedpokoju, strefy sprzątania i przejazd przez drzwi
+  const VAC_DOCK = [970,606];
+  const VAC_ZONES = {
+    salon:    {rect:[165,285,640,495], via:[[880,560],[770,470]]},
+    kuchnia:  {rect:[690,240,945,400], via:[[880,560],[770,470],[800,410]]},
+    sypialnia:{rect:[145,600,318,828], via:[[770,580],[690,590],[540,592]]},   // obok łóżka, nie pod nim
+  };
+  const VAC_SPEED = .95; // m/s w modelu (szybciej niż naprawdę, żeby było widać ruch)
+  function zigzag([x1,y1,x2,y2]){ const pts = []; let r = 0; for(let y=y1; y<=y2; y+=42, r^=1) pts.push(r?[x2,y]:[x1,y], r?[x1,y]:[x2,y]); return pts.map(p=>P(...p)) }
 
   let renderer, scene, camera, el, labelsEl, floors = {}, lights = {}, bulbs = {}, coffee, sel = null;
-  let washer, washerX = 0, drum, drumGlass, steam = [], tvScreen, tvLight, tvGlow, anim = {washer:false, coffee:false, tv:false};
+  let robot, brush, robotLed, vac = null, washer, washerX = 0, drum, drumGlass, steam = [], tvScreen, tvLight, tvGlow, anim = {washer:false, coffee:false, tv:false};
   const clock = new THREE.Clock();
   let az = -0.5, pol = 0.86, dist = 18.5, needs = true, raf = 0;
   const target = new THREE.Vector3(0, 0, 0.25);
@@ -81,6 +93,7 @@
       labelsEl.appendChild(lab);
     }
     for(const w of WALLS) box(...w, WALL_H, '#fbfbfd');
+    for(const w of INNER) box(...w, INNER_H, '#f4f5f8');
     for(const w of WINDOWS){
       box(...w, .25, '#fbfbfd');
       const g = box(w[0]+14,w[1],w[2]-14,w[3], WALL_H-.25, '#a9c6ee', .25, {transparent:true, opacity:.35, roughness:.1});
@@ -116,6 +129,25 @@
     tvBody.position.set(tx, .45 + .06 + .3, tz); tvBody.castShadow = true; scene.add(tvBody);
     tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.08,.53), new THREE.MeshBasicMaterial({color:0x0b0d12}));
     tvScreen.position.set(tx, tvBody.position.y, tz - .027); tvScreen.rotation.y = Math.PI; scene.add(tvScreen);
+    // robot sprzątający ze stacją w przedpokoju
+    box(1000,585,1028,628,.16,'#0e1f45');
+    robot = new THREE.Group();
+    const R = .24;
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(R*1.9, 40), new THREE.MeshBasicMaterial({color:0x3d7bff, transparent:true, opacity:0, depthWrite:false}));
+    halo.rotation.x = -Math.PI/2; halo.position.y = .025; robot.add(halo); robot.userData.halo = halo;
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(R,R,.1,36), new THREE.MeshStandardMaterial({color:0x0e1f45, roughness:.35, metalness:.2}));
+    body.position.y = .07; body.castShadow = true; robot.add(body);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(R*.98,.012,8,40), new THREE.MeshBasicMaterial({color:0x8fb0ff}));
+    rim.rotation.x = Math.PI/2; rim.position.y = .12; robot.add(rim);
+    const lidar = new THREE.Mesh(new THREE.CylinderGeometry(.065,.065,.045,24), new THREE.MeshStandardMaterial({color:0xdce6f8, roughness:.3}));
+    lidar.position.set(0,.14,-.08); robot.add(lidar);
+    robotLed = new THREE.Mesh(new THREE.SphereGeometry(.025,12,10), new THREE.MeshBasicMaterial({color:0x22a06b}));
+    robotLed.position.set(0,.125,.13); robot.add(robotLed);
+    brush = new THREE.Group(); brush.position.set(R*.72,.03,R*.72);
+    for(let i=0;i<3;i++){ const b = new THREE.Mesh(new THREE.BoxGeometry(.16,.008,.014), new THREE.MeshBasicMaterial({color:0x8fb0ff})); b.rotation.y = i*2.09; b.position.set(Math.cos(i*2.09)*.04,0,-Math.sin(i*2.09)*.04); brush.add(b) }
+    robot.add(brush);
+    const [dx,dz] = P(...VAC_DOCK); robot.position.set(dx, 0, dz); robot.rotation.y = Math.PI/2; scene.add(robot);
+    vac = {mode:'idle', zone:null, route:[], loop:[], flip:false};
     tvLight = new THREE.PointLight(0x6f8cff, 0, 3, 1.8); tvLight.position.set(tx, .8, tz - .6); scene.add(tvLight);
     // podświetlenie za telewizorem — widać, że gra, nawet od tyłu
     tvGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.5,.85), new THREE.MeshBasicMaterial({color:0x6f8cff, transparent:true, opacity:0, depthWrite:false}));
@@ -160,9 +192,46 @@
     renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
   }
   function kick(){ needs = true; if(!raf) raf = requestAnimationFrame(loop) }
-  const animating = () => anim.washer || anim.coffee || anim.tv;
+  const animating = () => anim.washer || anim.coffee || anim.tv || (vac && vac.mode !== 'idle');
+  function setVacuum(zone){
+    if(!vac) return;
+    const here = [robot.position.x, robot.position.z];
+    if(zone && zone !== vac.zone){
+      const Z = VAC_ZONES[zone]; if(!Z) return;
+      const back = vac.zone ? [...VAC_ZONES[vac.zone].via].reverse().map(p=>P(...p)) : [];
+      vac.loop = zigzag(Z.rect); vac.flip = false;
+      vac.route = [...back, ...Z.via.map(p=>P(...p)), vac.loop[0]];
+      vac.mode = 'going'; vac.zone = zone;
+    } else if(!zone && vac.mode !== 'idle' && vac.mode !== 'returning'){
+      const Z = VAC_ZONES[vac.zone];
+      vac.route = [...(Z ? [...Z.via].reverse().map(p=>P(...p)) : []), P(...VAC_DOCK)];
+      vac.mode = 'returning'; vac.zone = null;
+    }
+  }
+  function moveRobot(dt){
+    if(!vac || vac.mode === 'idle') return;
+    brush.rotation.y += dt*14;
+    let left = VAC_SPEED*dt;
+    while(left > 0){
+      if(!vac.route.length){
+        if(vac.mode === 'returning'){ vac.mode = 'idle'; robotLed.material.color.set(0x22a06b); kick(); return }
+        vac.mode = 'cleaning'; vac.flip = !vac.flip;
+        vac.route = vac.flip ? [...vac.loop].reverse() : [...vac.loop];
+      }
+      const [tx,tz] = vac.route[0], dx = tx - robot.position.x, dz = tz - robot.position.z, d = Math.hypot(dx,dz);
+      if(d < 1e-4){ vac.route.shift(); continue }
+      const want = Math.atan2(dx, dz);
+      let diff = want - robot.rotation.y; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+      robot.rotation.y += Math.max(-dt*7, Math.min(dt*7, diff));
+      const stepLen = Math.min(left, d);
+      robot.position.x += dx/d*stepLen; robot.position.z += dz/d*stepLen; left -= stepLen;
+      if(stepLen >= d) vac.route.shift();
+    }
+  }
   function step(){
     const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+    moveRobot(dt);
+    if(robot){ const h = robot.userData.halo; h.material.opacity = vac.mode === 'idle' ? 0 : .22 + Math.sin(t*5)*.1 }
     if(anim.washer){ drum.rotation.z -= dt*9; washer.position.x = washerX + Math.sin(t*55)*.006 }
     if(anim.coffee) for(const p of steam){
       const f = (t*.45 + p.userData.phase) % 1;
@@ -228,6 +297,8 @@
     }
     coffee.material.emissive.set(state.coffee ? 0xff8a3c : 0x000000); coffee.material.emissiveIntensity = .7;
     anim = {washer:!!state.washer, coffee:!!state.coffee, tv:!!state.tv};
+    setVacuum(state.vacuum || null);
+    if(state.vacuum) robotLed.material.color.set(0x3d7bff);
     for(const p of steam) p.visible = anim.coffee;
     if(!anim.washer) washer.position.x = washerX;
     drumGlass.material.emissive.set(anim.washer ? 0x3d6fd6 : 0x000000); drumGlass.material.emissiveIntensity = .35;

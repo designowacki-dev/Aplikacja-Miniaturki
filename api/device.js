@@ -1,6 +1,6 @@
 // Sterowanie urządzeniami smart home.
 //
-// POST { action: 'on'|'off'|'level'|'open', level?: 0-100, conn: { kind, entity?, onUrl?, offUrl? } }
+// POST { action: 'on'|'off'|'level'|'open'|'dock', level?: 0-100, conn: { kind, entity?, onUrl?, offUrl? } }
 //   kind 'ha'      → Home Assistant (zmienne HA_URL i HA_TOKEN w Vercelu), entity np. light.salon
 //   kind 'webhook' → wywołuje podany adres https (onUrl / offUrl), np. z IFTTT, Tuya, Shelly Cloud
 //   kind 'demo'    → nic nie wysyła (stan tylko w aplikacji)
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const { action, level } = body;
     const conn = body.conn || {};
-    if (!['on', 'off', 'level', 'open'].includes(action)) { res.status(400).json({ error: 'Złe polecenie' }); return; }
+    if (!['on', 'off', 'level', 'open', 'dock'].includes(action)) { res.status(400).json({ error: 'Złe polecenie' }); return; }
 
     if (conn.kind === 'ha') {
       const call = ha();
@@ -54,8 +54,9 @@ export default async function handler(req, res) {
       if (!ENTITY.test(conn.entity || '')) { res.status(400).json({ error: 'Nieprawidłowe entity_id' }); return; }
       const domain = conn.entity.split('.')[0];
       // „otwórz” (brama, winda, szlaban): właściwa usługa zależnie od rodzaju encji
-      const OPEN = { cover: 'open_cover', lock: 'unlock', button: 'press', input_button: 'press', automation: 'trigger' };
-      const service = action === 'open' ? (OPEN[domain] || 'turn_on') : action === 'off' ? 'turn_off' : 'turn_on';
+      const OPEN = { cover: 'open_cover', lock: 'unlock', button: 'press', input_button: 'press', automation: 'trigger', vacuum: 'start' };
+      const service = action === 'dock' ? (domain === 'vacuum' ? 'return_to_base' : 'turn_on')
+        : action === 'open' ? (OPEN[domain] || 'turn_on') : action === 'off' ? 'turn_off' : 'turn_on';
       const data = { entity_id: conn.entity };
       if (domain === 'light' && action !== 'off' && Number.isFinite(level)) data.brightness_pct = Math.max(1, Math.min(100, Math.round(level)));
       await call(`/api/services/${domain}/${service}`, data);
