@@ -146,6 +146,49 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 .links button{font-size:15px;color:var(--t2)}
 .links .del{color:var(--c-problem)}
 
+/* Dom: model 3D + urządzenia */
+.h3{position:relative;height:310px;border-radius:26px;overflow:hidden;background:#DCE6F8;box-shadow:var(--shadow);margin:6px 0 12px;touch-action:none;display:none}
+@media (prefers-color-scheme:dark){.h3{background:#13214A}}
+body.v-home .h3{display:block}
+.h3-canvas{position:absolute;inset:0}
+.h3-canvas canvas{width:100%!important;height:100%!important;display:block}
+.h3-labels{position:absolute;inset:0;pointer-events:none}
+.h3-lab{position:absolute;left:0;top:0;pointer-events:auto;padding:6px 11px;border-radius:15px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:12px;font-weight:500;color:#0E1F45;white-space:nowrap;box-shadow:0 6px 16px -8px rgba(14,31,69,.45);transition:background .25s,color .25s}
+.h3-lab.on::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#FFB648;margin-right:6px;vertical-align:0;box-shadow:0 0 8px #FFB648}
+.h3-lab.sel{background:#0E1F45;color:#fff}
+.h3-top{position:absolute;left:14px;top:14px;pointer-events:none}
+.h3-chip{display:inline-block;padding:8px 13px;border-radius:16px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:12px;font-weight:500;color:#0E1F45}
+.h3-hint{position:absolute;right:14px;bottom:12px;font-size:11px;color:#0E1F45;opacity:.45;pointer-events:none}
+@media (prefers-color-scheme:dark){.h3-hint{color:#fff}}
+.h3-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:14px}
+.dev-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dev{position:relative;min-height:140px;border-radius:24px;background:var(--s1);color:var(--t1);padding:14px 16px;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:var(--shadow);cursor:pointer;transition:background .3s var(--e-out),color .3s var(--e-out),transform .2s var(--e-out)}
+.dev:active{transform:scale(.97)}
+.dev.on{background:var(--navy);color:var(--navy-t)}
+.dev-ic{position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s}
+.dev.on .dev-ic{background:#FFD38F;color:#0E1F45;box-shadow:0 0 22px -2px rgba(255,190,90,.65)}
+.dev-n{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dev-s{font-size:13px;opacity:.6;margin-top:2px}
+.tgl{position:absolute;top:18px;right:14px;width:48px;height:28px;border-radius:14px;background:var(--s3);transition:background .25s}
+.tgl i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18);transition:transform .3s var(--e-drawer),background .25s}
+.tgl.on{background:var(--navy-f)}
+.dev:not(.on) .tgl{background:var(--s3)}
+.tgl.on i{transform:translateX(20px);background:#FFD38F}
+.dc{background:var(--s1);border-radius:26px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow);transition:background .3s,color .3s}
+.dc.on{background:var(--navy);color:var(--navy-t)}
+.dc-top{display:flex;align-items:center;gap:14px}
+.dc-ic{width:56px;height:56px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .3s}
+.dc.on .dc-ic{background:#FFD38F;color:#0E1F45;box-shadow:0 0 26px -2px rgba(255,190,90,.7)}
+.dc-st{flex:1;font-size:20px;font-weight:500}
+.dc .tgl{position:relative;width:58px;height:34px;border-radius:17px;flex-shrink:0}
+.dc .tgl i{width:28px;height:28px}
+.dc .tgl.on i{transform:translateX(24px)}
+.dc-range{display:flex;align-items:center;gap:12px;margin-top:18px}
+.dc-range input{flex:1;accent-color:#FFB648;height:30px}
+.dc-range b{font-size:15px;font-weight:500;min-width:44px;text-align:right}
+.sub-h{font-size:13px;color:var(--t2);margin:6px 6px 10px}
+.small-note{font-size:13px;color:var(--t2);line-height:1.5;margin:8px 6px 0}
+
 /* wyszukiwanie + segmenty */
 .search-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
 .search{position:relative;flex:1}
@@ -157,6 +200,8 @@ button{cursor:pointer;border:0;background:none;-webkit-user-select:none;user-sel
 .tab{flex:1;height:36px;border-radius:20px;font-size:14px;font-weight:500;color:var(--t2);position:relative;z-index:1;transition:color .3s var(--e-out)}
 .tab.on{color:var(--navy-t)}
 .tab b{font-size:12px;font-weight:500;margin-left:4px;opacity:.6}
+body.v-home .tab{font-size:13px;padding:0 2px}
+body.v-home .tab b{display:none}
 .tab-ind{position:absolute;top:4px;bottom:4px;left:4px;border-radius:20px;background:var(--seg-on);transition:transform .4s var(--e-drawer),width .4s var(--e-drawer);z-index:0}
 
 /* listy */
@@ -330,13 +375,16 @@ textarea.in{height:auto;min-height:84px;padding:14px 18px;resize:vertical}
 <div class="app">
   <div class="top" id="top">
   <nav class="views" id="views">
-    <button class="vw on" data-view="parcels"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><span>Przesyłki</span><b id="vc-parcels"></b></button>
+    <button class="vw" data-view="home"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M9.5 20.5V14h5v6.5"/></svg><span>Dom</span><b id="vc-home"></b></button>
+    <button class="vw" data-view="parcels"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg><span>Przesyłki</span><b id="vc-parcels"></b></button>
     <button class="vw" data-view="shop"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg><span>Do kupienia</span><b id="vc-shop"></b></button>
     <button class="vw" data-view="groc"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg><span>Zakupy</span><b id="vc-groc"></b></button>
     <button class="vw" data-view="tasks"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m8 12 3 3 5-6"/></svg><span>Zadania</span><b id="vc-tasks"></b></button>
   </nav>
     <button class="ib set" onclick="openSettings()" aria-label="Ustawienia"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
+
+  <section class="h3" id="home3d"><div class="h3-canvas" id="h3c"></div><div class="h3-top"><span class="h3-chip" id="h3chip"></span></div><span class="h3-hint">przeciągnij, aby obrócić</span></section>
 
   <section class="bento" id="bento"></section>
 
@@ -354,6 +402,28 @@ textarea.in{height:auto;min-height:84px;padding:14px 18px;resize:vertical}
 </div>
 
 <button class="fab hide" id="fab" onclick="openAddCurrent()"><span id="fabTxt">Dodaj przesyłkę</span><i class="fab-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></i></button>
+
+<!-- URZĄDZENIE -->
+<div class="sw" id="devSheet"><div class="sw-bg" onclick="closeSheet('devSheet')"></div>
+  <div class="sh">
+    <div class="grab"></div>
+    <div class="sh-h"><div><h2 id="dvTitle">Urządzenie</h2><p class="sub-h" id="dvRoomSub" style="margin:2px 0 0"></p></div><button class="ib" onclick="closeSheet('devSheet')" aria-label="Zamknij">✕</button></div>
+    <div class="dc" id="dvControl">
+      <div class="dc-top"><span class="dc-ic" id="dvIc"></span><span class="dc-st" id="dvState"></span><button class="tgl" id="dvTgl" onclick="toggleDevice(ui.devId)" aria-label="Włącz / wyłącz"><i></i></button></div>
+      <div class="dc-range" id="dvRangeW"><input type="range" id="dvRange" min="1" max="100" oninput="devRange(this.value)" onchange="devRange(this.value,true)"><b id="dvPct"></b></div>
+    </div>
+    <div class="fg"><label class="fl" for="dvName">Nazwa</label><input class="in" id="dvName" placeholder="np. Światło w salonie" autocomplete="off"></div>
+    <div class="fg"><label class="fl">Pokój</label><div class="chips" id="dvRooms"></div></div>
+    <div class="fg"><label class="fl">Rodzaj</label><div class="chips" id="dvTypes"></div></div>
+    <div class="fg"><label class="fl">Sterowanie</label><div class="chips" id="dvKinds"></div>
+      <p class="small-note" id="dvDemo">Tryb demo: przełącznik działa w aplikacji i synchronizuje się między telefonami, ale nie steruje prawdziwym urządzeniem.</p>
+      <div id="dvHA" style="margin-top:10px"><input class="in mono" id="dvEntity" placeholder="entity_id, np. light.salon" autocomplete="off" autocapitalize="off" spellcheck="false"><p class="small-note">Nazwa encji z Home Assistant (Ustawienia → Encje). Wymaga zmiennych HA_URL i HA_TOKEN w Vercelu.</p></div>
+      <div id="dvWH" style="margin-top:10px"><input class="in" id="dvOn" type="url" placeholder="Adres https do włączenia" autocomplete="off" autocapitalize="off"><input class="in" id="dvOff" type="url" placeholder="Adres https do wyłączenia" autocomplete="off" autocapitalize="off" style="margin-top:8px"><p class="small-note">Np. webhook z IFTTT, Shelly Cloud albo Tuya.</p></div>
+    </div>
+    <button class="btn btn-p" id="dvSave" onclick="saveDev()">Zapisz</button>
+    <div class="links"><button class="del" id="dvDel" onclick="delDev()">Usuń urządzenie</button></div>
+  </div>
+</div>
 
 <!-- LISTA ZAKUPÓW -->
 <div class="sw" id="grocSheet"><div class="sw-bg" onclick="closeSheet('grocSheet')"></div>
@@ -548,11 +618,11 @@ const GROUP_ORDER = ['pickup','out','problem','transit','pending','unknown'];
 
 /* ═══ STAN ═══ */
 const LS_KEY = 'parcels-v1';
-let S = {parcels:[], items:[], groceries:[], tasks:[], deleted:{}, settings:{notify:false, auto:true, view:'parcels'}};
-let ui = {view:'parcels', shopTab:'todo', taskTab:'open', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
+let S = {parcels:[], items:[], groceries:[], tasks:[], devices:[], deleted:{}, settings:{notify:false, auto:true, view:'home'}};
+let ui = {view:'home', homeTab:'all', devId:null, h3ready:false, shopTab:'todo', taskTab:'open', itemId:null, prio:'mid', tab:'active', q:'', editId:null, detId:null, carrier:null, carrierManual:false, evStatus:'transit', busy:new Set()};
 
 function load(){
-  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,items:d.items||[],groceries:d.groceries||[],tasks:d.tasks||[],deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
+  try{const r=localStorage.getItem(LS_KEY); if(r){const d=JSON.parse(r); S={...S,...d,items:d.items||[],groceries:d.groceries||[],tasks:d.tasks||[],devices:d.devices||[],deleted:d.deleted||{},settings:{...S.settings,...(d.settings||{})}};}}catch{}
 }
 function save(push=true){
   try{localStorage.setItem(LS_KEY, JSON.stringify(S))}catch{}
@@ -569,7 +639,7 @@ function mergeState(a, b){
   const deleted = {...(a.deleted||{})};
   for(const [id,ts] of Object.entries(b.deleted||{})) deleted[id] = Math.max(deleted[id]||0, ts||0);
   const out = {deleted};
-  for(const key of ['parcels','items','groceries','tasks']){
+  for(const key of ['parcels','items','groceries','tasks','devices']){
     const byId = new Map();
     for(const p of [...(a[key]||[]), ...(b[key]||[])]){
       if(!p||!p.id) continue;
@@ -581,24 +651,24 @@ function mergeState(a, b){
   }
   return out;
 }
-function sig(st){ return JSON.stringify([st.parcels,st.items||[],st.groceries||[],st.tasks||[]].map(l=>l.map(p=>[p.id,p.u||0])))+JSON.stringify(st.deleted) }
+function sig(st){ return JSON.stringify([st.parcels,st.items||[],st.groceries||[],st.tasks||[],st.devices||[]].map(l=>l.map(p=>[p.id,p.u||0])))+JSON.stringify(st.deleted) }
 async function syncNow(loud){
   if(syncing){ syncAgain=true; return }
   syncing=true;
   try{
     const before = sig(S);
-    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, items:S.items, groceries:S.groceries, tasks:S.tasks, deleted:S.deleted})});
+    const r = await fetch('/api/parcels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parcels:S.parcels, items:S.items, groceries:S.groceries, tasks:S.tasks, devices:S.devices, deleted:S.deleted})});
     if(r.status===401){ location.reload(); return }
     if(r.status===503){ syncInfo.state='off'; if(loud) toast('Synchronizacja wyłączona — podłącz bazę w Vercelu'); return }
     if(!r.ok) throw new Error(r.status);
     const remote = await r.json();
     const merged = mergeState(S, remote);           // zmiany zrobione w trakcie wysyłki zostają
     const changed = sig(merged)!==before;
-    S.parcels = merged.parcels; S.items = merged.items; S.groceries = merged.groceries; S.tasks = merged.tasks; S.deleted = merged.deleted;
+    S.parcels = merged.parcels; S.items = merged.items; S.groceries = merged.groceries; S.tasks = merged.tasks; S.devices = merged.devices; S.deleted = merged.deleted;
     save(false);
     syncInfo = {state:'on', last:Date.now()};
     if(changed){
-      render();
+      render(); update3D();
       if(ui.detId && $('detSheet').classList.contains('on')) renderDetail();
     }
     if(loud) toast(changed?'Pobrano zmiany z innych urządzeń ✓':'Zsynchronizowano ✓');
@@ -691,7 +761,8 @@ function render(){
   setCnt('vc-shop', S.items.filter(it=>!it.bought).length);
   setCnt('vc-groc', S.groceries.filter(g=>!g.done).length);
   setCnt('vc-tasks', S.tasks.filter(t=>!t.done).length);
-  if(ui.view==='shop') renderShop(); else if(ui.view==='groc') renderGroc(); else if(ui.view==='tasks') renderTasks(); else renderParcels();
+  setCnt('vc-home', S.devices.filter(d=>d.on).length);
+  if(ui.view==='home') renderHome(); else if(ui.view==='shop') renderShop(); else if(ui.view==='groc') renderGroc(); else if(ui.view==='tasks') renderTasks(); else renderParcels();
   renderBento();
   syncDom($('bento'), bentoBuf); syncDom($('list'), listBuf);
 }
@@ -756,6 +827,7 @@ const QI = {
   alert:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>',
 };
 const MI = { // małe ikony w przeglądzie
+  bulb:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>',
   box:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>',
   truck:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
   ok:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
@@ -770,6 +842,7 @@ function monthStart(){ const m=new Date(); m.setDate(1); m.setHours(0,0,0,0); re
 
 function renderBento(){
   const B = bentoBuf;
+  if(ui.view==='home'){ B.innerHTML = bentoHome(); return }
   if(ui.view==='shop'){
     const todo = S.items.filter(it=>!it.bought);
     const high = todo.filter(it=>(it.prio||'mid')==='high');
@@ -912,18 +985,20 @@ function plural(n,a,b,c){if(n===1)return a;const m10=n%10,m100=n%100;return(m10>
 
 /* ═══ ZAKŁADKI ═══ */
 const TABS = {
+  home:[['all','Wszystko'],['salon','Salon'],['sypialnia','Sypialnia'],['lazienka','Łazienka'],['przedpokoj','Hol']],
   parcels:[['active','Aktywne'],['delivered','Odebrane'],['archived','Archiwum']],
   shop:[['todo','Do kupienia'],['bought','Kupione']],
   groc:[],
   tasks:[['open','Do zrobienia'],['done','Zrobione']],
 };
 const VIEW = {
+  home:{fab:'Dodaj urządzenie', ph:'Szukaj urządzeń'},
   parcels:{fab:'Dodaj przesyłkę', ph:'Szukaj po nazwie lub numerze'},
   shop:{fab:'Dodaj do listy', ph:'Szukaj w rzeczach do kupienia'},
   groc:{fab:'Dodaj produkt', ph:'Szukaj na liście zakupów'},
   tasks:{fab:'Dodaj zadanie', ph:'Szukaj w zadaniach'},
 };
-function curTab(){ return ui.view==='shop' ? ui.shopTab : ui.view==='tasks' ? ui.taskTab : ui.tab }
+function curTab(){ return ui.view==='home' ? ui.homeTab : ui.view==='shop' ? ui.shopTab : ui.view==='tasks' ? ui.taskTab : ui.tab }
 function renderTabs(){
   $('tabs').style.display = TABS[ui.view].length ? '' : 'none';
   $('tabs').innerHTML = '<div class="tab-ind" id="tabInd"></div>' + TABS[ui.view].map(([k,l])=>
@@ -937,11 +1012,12 @@ function moveInd(){
 $('tabs').addEventListener('click',e=>{
   const b = e.target.closest('.tab'); if(!b) return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
-  if(ui.view==='shop') ui.shopTab = b.dataset.tab; else if(ui.view==='tasks') ui.taskTab = b.dataset.tab; else ui.tab = b.dataset.tab;
+  if(ui.view==='home'){ ui.homeTab = b.dataset.tab; update3D() } else if(ui.view==='shop') ui.shopTab = b.dataset.tab; else if(ui.view==='tasks') ui.taskTab = b.dataset.tab; else ui.tab = b.dataset.tab;
   moveInd(); render();
 });
 function setView(v){
-  if(!VIEW[v]) v = 'parcels';
+  if(!VIEW[v]) v = 'home';
+  document.body.classList.toggle('v-home', v==='home');
   ui.view = v; S.settings.view = v; save(false);
   document.querySelectorAll('.vw').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
   $('q').placeholder = VIEW[v].ph;
@@ -952,11 +1028,12 @@ function setView(v){
   setView._t = setTimeout(()=>document.body.classList.remove('anim'), 900);
   renderTabs(); render(); moveInd();
   window.scrollTo({top:0}); setTimeout(fabVis, 50);
+  if(v==='home'){ ensure3D(); update3D(); if(window.Home3D && ui.h3ready){ Home3D.resize(); Home3D.kick() } syncHA() }
 }
 function fabVis(){ const b=$('bento').getBoundingClientRect(); $('fab').classList.toggle('hide', b.bottom > 120) }
 addEventListener('scroll',()=>{ $('top').classList.toggle('scrolled', scrollY>4); fabVis() }, {passive:true});
 $('views').addEventListener('click',e=>{ const b=e.target.closest('.vw'); if(b && b.dataset.view!==ui.view) setView(b.dataset.view) });
-function openAddCurrent(){ ({shop:()=>openItemSheet(null), groc:()=>openGrocSheet(null), tasks:()=>openTaskSheet(null)}[ui.view] || openAdd)() }
+function openAddCurrent(){ ({home:()=>openDevSheet(null), shop:()=>openItemSheet(null), groc:()=>openGrocSheet(null), tasks:()=>openTaskSheet(null)}[ui.view] || openAdd)() }
 $('q').addEventListener('input',e=>{ui.q=e.target.value; render()});
 window.addEventListener('resize', moveInd);
 
@@ -1309,6 +1386,227 @@ function goTasks(tab, grp){
   setTimeout(()=>scrollToGrp(grp||'none'), 30);
 }
 
+/* ═══ DOM (smart home) ═══ */
+const ROOMS_UI = {salon:'Salon', sypialnia:'Sypialnia', lazienka:'Łazienka', przedpokoj:'Przedpokój'};
+const DI = {
+  light:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/></svg>',
+  coffee:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3c0 1 1 1.5 1 2.5S8 7 8 7M12 3c0 1 1 1.5 1 2.5S12 7 12 7"/></svg>',
+  plug:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></svg>',
+  tv:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8"/></svg>',
+  ac:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 6l2.5-1.5M9.5 19.5 12 18l2.5 1.5"/></svg>',
+  other:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg>',
+};
+const DTYPES = {light:'Światło', coffee:'Ekspres', plug:'Gniazdko', tv:'Telewizor', ac:'Klimatyzacja', other:'Inne'};
+const DEFAULT_DEVICES = [
+  ['dev-salon-light','Światło','light','salon',80],
+  ['dev-kuchnia-light','Światło nad blatem','light','salon',100],
+  ['dev-ekspres','Ekspres do kawy','coffee','salon'],
+  ['dev-tv','Telewizor','tv','salon'],
+  ['dev-sypialnia-light','Światło','light','sypialnia',70],
+  ['dev-lampka','Lampka nocna','light','sypialnia',30],
+  ['dev-lazienka-light','Światło','light','lazienka',100],
+  ['dev-pralka','Pralka','plug','lazienka'],
+  ['dev-przedpokoj-light','Światło','light','przedpokoj',100],
+];
+function seedDevices(){
+  if(S.settings.devSeeded) return;
+  const have = new Set(S.devices.map(d=>d.id));
+  for(const [id,name,type,room,level] of DEFAULT_DEVICES)
+    if(!have.has(id) && !S.deleted[id]) S.devices.push({id,name,type,room,on:false,level:level??null,conn:{kind:'demo'},created:new Date(0).toISOString(),u:1});
+  S.settings.devSeeded = true;
+}
+const MOON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+const SOFA = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v4H3zM5 17v2M19 17v2"/></svg>';
+const DOOR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h8M14 3l5 2v14l-5 2zM11 12h.01"/></svg>';
+const SCENES = [
+  {id:'morning', name:'Dzień dobry', icon:QI.sun, f:d=> d.type==='coffee'?{on:true} : (d.type==='light' && d.room==='salon')?{on:true,level:100} : d.id==='dev-sypialnia-light'?{on:true,level:60} : null},
+  {id:'evening', name:'Wieczór', icon:SOFA, f:d=> d.type!=='light'?null : (d.room==='salon'||d.id==='dev-lampka')?{on:true,level:40}:{on:false}},
+  {id:'night', name:'Noc', icon:MOON, f:d=> d.id==='dev-lampka'?{on:true,level:10} : (d.type==='light'||d.type==='tv'||d.type==='coffee')?{on:false}:null},
+  {id:'away', name:'Wychodzę', icon:DOOR, f:d=> d.type==='plug'?null:{on:false}},
+];
+function devStatus(d){
+  if(!d.on) return 'Wyłączone';
+  if(d.type==='light' && d.level!=null) return `Włączone · ${d.level}%`;
+  if(d.type==='coffee') return 'Włączony';
+  return 'Włączone';
+}
+function devTile(d, i){
+  return `<div class="dev ${d.on?'on':''} t-${d.type}" onclick="openDev('${d.id}')">
+    <span class="dev-ic">${DI[d.type]||DI.other}</span>
+    <button class="tgl ${d.on?'on':''}" onclick="event.stopPropagation();toggleDevice('${d.id}')" aria-label="${d.on?'Wyłącz':'Włącz'}"><i></i></button>
+    <span class="dev-n">${esc(d.name)}</span><span class="dev-s">${devStatus(d)}</span>
+  </div>`;
+}
+function renderHome(){
+  const q = ui.q.trim().toLowerCase();
+  let list = S.devices;
+  for(const k of Object.keys(ROOMS_UI)) setCnt('cnt-'+k, S.devices.filter(d=>d.room===k && d.on).length);
+  setCnt('cnt-all', S.devices.filter(d=>d.on).length);
+  if(ui.homeTab!=='all') list = list.filter(d=>d.room===ui.homeTab);
+  if(q) list = list.filter(d=>(d.name||'').toLowerCase().includes(q)||(ROOMS_UI[d.room]||'').toLowerCase().includes(q));
+  const L = listBuf;
+  if(!list.length){
+    L.innerHTML = `<div class="empty"><div class="em-ic">${DI.light}</div><h2>${q?'Nic nie znaleziono':'Brak urządzeń'}</h2><p>${q?'Spróbuj innej nazwy.':'Dodaj światło, ekspres albo gniazdko w tym pokoju.'}</p></div>`;
+    return;
+  }
+  let html='', i=0;
+  for(const k of Object.keys(ROOMS_UI)){
+    const g = list.filter(d=>d.room===k);
+    if(!g.length) continue;
+    const on = g.filter(d=>d.on).length;
+    html += `<section class="grp" id="g-${k}"><div class="grp-h">${ROOMS_UI[k]}<span class="grp-sum">${on?`${on} wł.`:''}</span></div><div class="dev-grid">${g.map(d=>devTile(d,i++)).join('')}</div></section>`;
+  }
+  L.innerHTML = html;
+}
+function bentoHome(){
+  const lights = S.devices.filter(d=>d.type==='light'), lOn = lights.filter(d=>d.on).length;
+  const on = S.devices.filter(d=>d.on).length;
+  const rooms = new Set(S.devices.filter(d=>d.type==='light'&&d.on).map(d=>d.room)).size;
+  return overview('Dom', [
+      {label:'Światła', n:lOn, unit:`z ${lights.length}`, icon:MI.bulb, color:'#E9A23B', act:"setHomeTab('all')"},
+      {label:'Urządzenia', n:on, unit:`z ${S.devices.length} wł.`, icon:MI.grid, color:'var(--link)', act:"setHomeTab('all')"},
+      {label:'Pokoje', n:rooms, unit:'ze światłem', icon:MI.box, color:'var(--c-delivered)', act:"setHomeTab('all')"},
+    ]) +
+    quick(SCENES.map(s=>({icon:s.icon, label:s.name, act:`applyScene('${s.id}')`})));
+}
+function homeState(){
+  const rooms = {};
+  for(const k of Object.keys(ROOMS_UI)){
+    const ls = S.devices.filter(d=>d.room===k && d.type==='light');
+    const onL = ls.filter(d=>d.on);
+    rooms[k] = {on:onL.length>0, level:onL.length?Math.max(...onL.map(d=>d.level??100)):0, label:ROOMS_UI[k]};
+  }
+  return {rooms, coffee:S.devices.some(d=>d.type==='coffee'&&d.on), selected:ui.homeTab!=='all'?ui.homeTab:null};
+}
+function update3D(){
+  const on = S.devices.filter(d=>d.on).length;
+  const chip = $('h3chip'); if(chip) chip.textContent = on ? `${on} ${plural(on,'urządzenie włączone','urządzenia włączone','urządzeń włączonych')}` : 'Wszystko wyłączone';
+  if(window.Home3D && ui.h3ready) Home3D.update(homeState());
+}
+let h3loading = null;
+function ensure3D(){
+  if(ui.h3ready || h3loading) return;
+  const ok = (()=>{ try{ return !!document.createElement('canvas').getContext('webgl') }catch{ return false } })();
+  if(!ok){ $('h3c').innerHTML = '<div class="h3-msg">Ten telefon nie obsługuje widoku 3D</div>'; return }
+  h3loading = (window.THREE?Promise.resolve():loadScript('/vendor/three.min.js'))
+    .then(()=>window.Home3D?null:loadScript('/home3d.js'))
+    .then(()=>{ Home3D.build($('h3c'), room=>setHomeTab(ui.homeTab===room?'all':room)); ui.h3ready=true; update3D() })
+    .catch(()=>{ $('h3c').innerHTML = '<div class="h3-msg">Nie udało się wczytać modelu 3D</div>' })
+    .finally(()=>{ h3loading=null });
+}
+function setHomeTab(k){
+  if(ui.view!=='home') return;
+  ui.homeTab = k; renderTabs(); render(); moveInd(); update3D();
+}
+async function setDevice(d, patch, silent){
+  const prev = {on:d.on, level:d.level};
+  Object.assign(d, patch); touch(d); save(); render(); update3D();
+  if(ui.devId===d.id && $('devSheet').classList.contains('on')) paintDevControl();
+  const kind = (d.conn&&d.conn.kind)||'demo';
+  if(kind==='demo') return true;
+  const action = d.on===false ? 'off' : (patch.level!=null && prev.on) ? 'level' : 'on';
+  try{
+    const r = await fetch('/api/device',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action, level:d.level, conn:d.conn})});
+    if(r.status===401){ location.reload(); return false }
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || j.error) throw new Error(j.error||('HTTP '+r.status));
+    return true;
+  }catch(e){
+    Object.assign(d, prev); touch(d); save(); render(); update3D();
+    if(ui.devId===d.id && $('devSheet').classList.contains('on')) paintDevControl();
+    if(!silent) toast(`${d.name}: ${e.message||'błąd połączenia'}`);
+    return false;
+  }
+}
+function toggleDevice(id){
+  const d = S.devices.find(x=>x.id===id); if(!d) return;
+  if(navigator.vibrate) navigator.vibrate(12);
+  setDevice(d, {on:!d.on});
+}
+async function applyScene(id){
+  const sc = SCENES.find(s=>s.id===id); if(!sc) return;
+  const jobs = [];
+  for(const d of S.devices){ const p = sc.f(d); if(p && (p.on!==d.on || (p.level!=null && p.level!==d.level))) jobs.push(setDevice(d, p, true)) }
+  toast(`Scena: ${sc.name}`);
+  const res = await Promise.all(jobs);
+  if(res.includes(false)) toast('Część urządzeń nie odpowiedziała');
+}
+// stan z Home Assistant
+async function syncHA(){
+  const ha = S.devices.filter(d=>d.conn&&d.conn.kind==='ha'&&d.conn.entity);
+  if(!ha.length) return;
+  try{
+    const r = await fetch('/api/device?entities='+encodeURIComponent(ha.map(d=>d.conn.entity).join(',')));
+    if(!r.ok) return;
+    const j = await r.json(); let ch = false;
+    for(const d of ha){ const s = j[d.conn.entity]; if(!s || s.error) continue;
+      if(s.on!==d.on || (s.level!=null && s.level!==d.level)){ d.on = s.on; if(s.level!=null) d.level = s.level; touch(d); ch = true } }
+    if(ch){ save(); render(); update3D() }
+  }catch{}
+}
+
+/* okno urządzenia */
+let devDraft = null;
+function openDev(id){ openDevSheet(S.devices.find(x=>x.id===id)) }
+function openDevSheet(d){
+  ui.devId = d?d.id:null;
+  devDraft = d ? {...d, conn:{...(d.conn||{kind:'demo'})}} : {id:null, name:'', type:'light', room:ui.homeTab!=='all'?ui.homeTab:'salon', on:false, level:100, conn:{kind:'demo'}};
+  $('dvTitle').textContent = d ? d.name : 'Nowe urządzenie';
+  $('dvRoomSub').textContent = d ? ROOMS_UI[d.room] : '';
+  $('dvControl').style.display = d ? '' : 'none';
+  $('dvName').value = devDraft.name;
+  $('dvEntity').value = devDraft.conn.entity||''; $('dvOn').value = devDraft.conn.onUrl||''; $('dvOff').value = devDraft.conn.offUrl||'';
+  $('dvSave').textContent = d ? 'Zapisz ustawienia' : 'Dodaj urządzenie';
+  $('dvDel').style.display = d ? '' : 'none';
+  paintDevChips(); if(d) paintDevControl();
+  openSheet('devSheet');
+  if(!d) setTimeout(()=>$('dvName').focus(),350);
+}
+function paintDevControl(){
+  const d = S.devices.find(x=>x.id===ui.devId); if(!d) return;
+  const c = $('dvControl');
+  c.classList.toggle('on', !!d.on);
+  $('dvIc').innerHTML = DI[d.type]||DI.other;
+  $('dvState').textContent = devStatus(d);
+  $('dvTgl').classList.toggle('on', !!d.on);
+  const showR = d.type==='light';
+  $('dvRangeW').style.display = showR ? '' : 'none';
+  if(showR){ $('dvRange').value = d.level??100; $('dvPct').textContent = (d.level??100)+'%' }
+}
+function paintDevChips(){
+  $('dvRooms').innerHTML = Object.entries(ROOMS_UI).map(([k,l])=>`<button class="chip ${devDraft.room===k?'on':''}" onclick="devDraft.room='${k}';paintDevChips()">${l}</button>`).join('');
+  $('dvTypes').innerHTML = Object.entries(DTYPES).map(([k,l])=>`<button class="chip ${devDraft.type===k?'on':''}" onclick="devDraft.type='${k}';paintDevChips()">${l}</button>`).join('');
+  const kinds = {demo:'Demo', ha:'Home Assistant', webhook:'Webhook'};
+  $('dvKinds').innerHTML = Object.entries(kinds).map(([k,l])=>`<button class="chip ${devDraft.conn.kind===k?'on':''}" onclick="devDraft.conn.kind='${k}';paintDevChips()">${l}</button>`).join('');
+  $('dvHA').style.display = devDraft.conn.kind==='ha' ? '' : 'none';
+  $('dvWH').style.display = devDraft.conn.kind==='webhook' ? '' : 'none';
+  $('dvDemo').style.display = devDraft.conn.kind==='demo' ? '' : 'none';
+}
+function devRange(v, commit){
+  const d = S.devices.find(x=>x.id===ui.devId); if(!d) return;
+  $('dvPct').textContent = v+'%';
+  if(commit) setDevice(d, {level:+v, on:+v>0});
+}
+function saveDev(){
+  const name = $('dvName').value.trim();
+  if(!name){ toast('Wpisz nazwę urządzenia'); $('dvName').focus(); return }
+  const conn = {kind:devDraft.conn.kind};
+  if(conn.kind==='ha'){ conn.entity = $('dvEntity').value.trim().toLowerCase(); if(!/^[a-z_]+\.[a-z0-9_]+$/.test(conn.entity)){ toast('Wpisz entity_id, np. light.salon'); $('dvEntity').focus(); return } }
+  if(conn.kind==='webhook'){ conn.onUrl = $('dvOn').value.trim(); conn.offUrl = $('dvOff').value.trim();
+    if(!/^https:\/\//i.test(conn.onUrl) || !/^https:\/\//i.test(conn.offUrl)){ toast('Podaj oba adresy https'); return } }
+  const data = {name, type:devDraft.type, room:devDraft.room, conn};
+  if(ui.devId){ const d=S.devices.find(x=>x.id===ui.devId); Object.assign(d,data); if(d.type==='light' && d.level==null) d.level=100; touch(d) }
+  else S.devices.push({id:uid(), ...data, on:false, level:data.type==='light'?100:null, created:new Date().toISOString(), u:Date.now()});
+  save(); render(); update3D(); closeSheet('devSheet'); toast(ui.devId?'Zapisano ✓':'Dodano urządzenie ✓');
+  if(conn.kind==='ha') syncHA();
+}
+function delDev(){
+  const d = S.devices.find(x=>x.id===ui.devId); if(!d) return;
+  if(!confirm(`Usunąć „${d.name}”?`)) return;
+  S.deleted[d.id]=Date.now(); S.devices=S.devices.filter(x=>x.id!==d.id);
+  save(); render(); update3D(); closeSheet('devSheet'); toast('Usunięto');
+}
+
 /* ═══ ARKUSZE ═══ */
 function openSheet(id){ $(id).classList.add('on'); document.body.style.overflow='hidden' }
 function closeSheet(id){ $(id).classList.remove('on'); if(!document.querySelector('.sw.on')) document.body.style.overflow='' }
@@ -1550,6 +1848,7 @@ function paintSettings(){
   $('srvState').innerHTML =
     stateRow(syncOk, 'Synchronizacja między telefonami', syncDesc) +
     stateRow(apiOk===false?false:true, 'InPost i Poczta Polska', apiOk===false?'Serwer śledzenia niedostępny.':'Statusy pobierają się automatycznie.') +
+    stateRow(srv?srv.ha:null, 'Home Assistant (sterowanie domem)', srv?(srv.ha?'Połączony — urządzenia z encją HA są sterowane naprawdę.':'Nieustawiony — dodaj HA_URL i HA_TOKEN w Vercelu, żeby sterować prawdziwymi urządzeniami.'):'Sprawdzam…') +
     stateRow(t17, 'DPD, DHL, GLS, UPS, FedEx, Orlen', t17===true?'Statusy pobierają się automatycznie (17TRACK).':t17===false?'Wymaga darmowego klucza z 17track.net jako zmiennej TRACK17_KEY w Vercelu.':'Sprawdzam…');
 }
 async function openSettings(){ paintSettings(); openSheet('setSheet'); await loadServerStatus(); paintSettings() }
@@ -1566,7 +1865,7 @@ function importData(e){
     for(const p of d.parcels){ if(p&&p.number&&!have.has(p.number)){ S.parcels.push({events:[],status:'unknown',...p,id:p.id||uid(),u:Date.now()}); n++ } }
     const haveIt=new Set(S.items.map(x=>x.id));
     for(const it of (d.items||[])){ if(it&&it.name&&!haveIt.has(it.id)){ S.items.push({...it,id:it.id||uid(),u:Date.now()}); n++ } }
-    for(const key of ['groceries','tasks']){ const have=new Set(S[key].map(x=>x.id)); for(const x of (d[key]||[])){ if(x&&!have.has(x.id)){ S[key].push({...x,id:x.id||uid(),u:Date.now()}); n++ } } }
+    for(const key of ['groceries','tasks','devices']){ const have=new Set(S[key].map(x=>x.id)); for(const x of (d[key]||[])){ if(x&&!have.has(x.id)){ S[key].push({...x,id:x.id||uid(),u:Date.now()}); n++ } } }
     save(); render(); toast(`Zaimportowano ${n} ${plural(n,'pozycję','pozycje','pozycji')}`);
   }catch{ toast('Nieprawidłowy plik') } };
   r.readAsText(f); e.target.value='';
@@ -1625,7 +1924,10 @@ function closeScan(){
 
 /* ═══ START ═══ */
 (async function init(){
-  load(); setView(S.settings.view||'parcels');
+  load(); seedDevices();
+  if(!S.settings.homeIntro){ S.settings.homeIntro = true; S.settings.view = 'home' }   // po aktualizacji start na ekranie Dom
+  setView(S.settings.view||'home');
+  setInterval(()=>{ if(ui.view==='home' && document.visibilityState==='visible') syncHA() }, 30e3);
   setTimeout(moveInd, 300);
   await syncNow(false);
   setupAuto();

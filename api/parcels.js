@@ -40,7 +40,7 @@ export function mergeState(a, b) {
   for (const id of Object.keys(deleted)) if (now - deleted[id] > TOMBSTONE_TTL) delete deleted[id];
 
   const out = { deleted };
-  for (const key of ['parcels', 'items', 'groceries', 'tasks']) {   // przesyłki, do kupienia, lista zakupów, zadania
+  for (const key of ['parcels', 'items', 'groceries', 'tasks', 'devices']) {   // przesyłki, do kupienia, lista zakupów, zadania
     const byId = new Map();
     for (const p of [...(a[key] || []), ...(b[key] || [])]) {
       if (!p || !p.id) continue;
@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     }
     if (req.method === 'POST') {
       const body = parse(req.body) || {};
-      const merged = mergeState(stored, { parcels: body.parcels || [], items: body.items || [], groceries: body.groceries || [], tasks: body.tasks || [], deleted: body.deleted || {} });
+      const merged = mergeState(stored, { parcels: body.parcels || [], items: body.items || [], groceries: body.groceries || [], tasks: body.tasks || [], devices: body.devices || [], deleted: body.deleted || {} });
       await redis(['SET', KEY, JSON.stringify(merged)]);
       res.status(200).json(merged);
       return;

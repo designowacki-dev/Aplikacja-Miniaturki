@@ -5,5 +5,6 @@ export default function handler(req, res) {
     sync: !!((process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) &&
              (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN)),
     track17: !!process.env.TRACK17_KEY,
+    ha: !!(process.env.HA_URL && process.env.HA_TOKEN),
   });
 }
